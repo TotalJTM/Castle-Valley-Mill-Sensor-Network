@@ -1,0 +1,53 @@
+{% extends "layout.html" -%}
+{% block content -%}
+<div class="container">
+    <div class="row">
+            {% for obj in page_data['nodes'] %}
+              <div class="col-sm-4">
+                <div class="card">
+                  <div class="card-header">
+                    <h2>{{obj['nodeName']}}</h2>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text" id="id{{obj['nodeID']}}">ID: {{obj['nodeID']}}</p>
+                    <p class="card-text" id="{{obj['nodeID']}}battery">Battery Level: {{obj['batteryReadings'][0]}}</p>
+                    <p class="card-text" id="{{obj['nodeID']}}lastresp">Last Online: {{obj['lastResponse'][0]}}</p>
+                  </div>
+                  <ul class="list-group list-group-flush">
+                    {% for sens in obj['sensors'] %}
+                      {% if sens['sensorName'] != "" %}
+                        <p id="{{obj['nodeID']}}{{sens['sensorID']}}title">{{sens['sensorName']}}     {{sens['sensorType']}}</p>
+                          </br>
+                          <p id="{{obj['nodeID']}}{{sens['sensorID']}}val">{{sens['sensorData'][0]}}</p>
+                      {% else %}
+                        <li class="list-group-item" id="{{obj['nodeID']}}{{sens['sensorID']}}">
+                          <p id="{{obj['nodeID']}}{{sens['sensorID']}}title">Sensor: {{sens['sensorID']}} ({{sens['sensorType']}})</p>
+                          </br>
+                          <p id="{{obj['nodeID']}}{{sens['sensorID']}}val">{{sens['sensorData'][0]}}</p>
+                        </li>
+                      {% endif %}
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+             
+            {% endfor %}
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+var socket = io.connect('http://' + document.domain + ':' + location.port);
+socket.on('sensor_update', function(rdata){
+  var data = JSON.parse(rdata);
+  $(document.getElementById(data.nodeID+"battery")).text("Battery Level: "+data.batteryReadings[0]);
+  $(document.getElementById(data.nodeID+"lastresp")).text("Last Response: "+data.lastResponse[0]);
+  for(var i=0;i < data.sensors.length;i++){
+    var sens = data.sensors[i]
+    $(document.getElementById(data.nodeID+sens.sensorID+"val")).text(sens.sensorData[0]);
+  }//data.sensors[i].sensorID+
+});
+
+socket.on('new_sensor', function(data){
+  document.location.reload()
+});
+</script>
+{%- endblock content %}

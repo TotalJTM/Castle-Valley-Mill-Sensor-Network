@@ -1,0 +1,43 @@
+{
+	"nodes":[
+		{
+			"nodeID": 111111,
+			"nodeAssignedName": "Porch",
+			"batteryType": 0,
+			"sensors": [
+				{
+					"sensorID": 1,
+					"sensorAssignedName": "Porch Temperature",
+					"sensorType": "dht11",
+					"sensorCalibration": null
+				}
+			]
+		},
+		{
+			"nodeID": 111112,
+			"nodeAssignedName": "Dining Room",
+			"batteryType": 0,
+			"sensors": [
+				{
+					"sensorID": 1,
+					"sensorAssignedName": "Dining Room Temperature",
+					"sensorType": "dht11",
+					"sensorCalibration": null
+				}
+			]
+		},
+		{
+			"nodeID": 111113,
+			"nodeAssignedName": "Sunroom",
+			"batteryType": 0,
+			"sensors": [
+				{
+					"sensorID": 1,
+					"sensorAssignedName": "Sunroom Temperature",
+					"sensorType": "dht11",
+					"sensorCalibration": null
+				}
+			]
+		}
+	]
+}

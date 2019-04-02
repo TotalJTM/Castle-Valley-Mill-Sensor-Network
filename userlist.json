@@ -1,0 +1,14 @@
+{
+	"users":[
+	{
+		"username":"TotalJTM",
+		"password":"$2a$10$59R6vwsHkYwWOp0avu3jMucblV3RYuPxFVXrxjZ/IUC9e94Y3vQ0i",
+		"perms":"super"
+	},
+	{
+		"username":"hasenmeer",
+		"password":"$2a$10$dpZQrPcf1VpsgKWBqw6TH.JBaB5nH3B4qTUYnyWfDowJIMU7Yxiwi",
+		"perms":"super"
+	}
+	]
+}
