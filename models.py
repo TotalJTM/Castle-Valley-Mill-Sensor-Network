@@ -28,6 +28,18 @@ class Device(db.Model):
 	battery_data = db.relationship('BatteryData', backref='device', lazy=True)
 	sensors = db.relationship('Sensor', backref='device', lazy=False)
 
+	def __init__(self,assigned_id,title,mill_floor,battery_type):
+		self.assigned_id = assigned_id
+		self.title = title
+		self.mill_floor = mill_floor
+		self.battery_type = battery_type
+
+	@classmethod
+	def create(cls, **kw):
+		obj = cls(**kw)
+		db.session.add(obj)
+		db.session.commit()
+
 class BatteryData(db.Model):
 	__bind_key__ = 'network'
 	id = db.Column(db.Integer, primary_key=True)

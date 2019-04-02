@@ -52,9 +52,9 @@ def form_new(config_option):
     if(config_option == 'device'):
         form = DeviceForm(request.form)
         if(request.method == 'POST' and form.validate_on_submit()):
-            new_device = Device(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,mill_floor=form.entry_mill_floor.data,battery_type=form.entry_battery_type.data)
-            db.session.add(new_device)
-            db.session.commit()
+            new_device = Device.create(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,mill_floor=form.entry_mill_floor.data,battery_type=form.entry_battery_type.data)
+            #db.session.add(new_device)
+            #db.session.commit()
             return redirect(url_for('view_devices'))
         return render_template('deviceform.html', form=form)
 
