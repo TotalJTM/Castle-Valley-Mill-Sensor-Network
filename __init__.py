@@ -6,11 +6,12 @@ import network.logs as log
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+log.logger.debug(basedir)
 
 app = Flask(__name__)
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
-tuser = 'sqlite:///' + os.path.join(basedir, 'userdb.db')
-tnet = 'sqlite:///' + os.path.join(basedir, 'network.db')
+SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database\\app.db')
+tuser = 'sqlite:///' + os.path.join(basedir, 'database\\userdb.db')
+tnet = 'sqlite:///' + os.path.join(basedir, 'database\\network.db')
 SQLALCHEMY_BINDS = {
     'users': tuser,
     'network': tnet
