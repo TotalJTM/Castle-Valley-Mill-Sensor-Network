@@ -1,0 +1,24 @@
+{
+	"user":{
+		"user_current":"totalJTM",
+		"user_permission":"super"
+	}
+	"device":[
+		{
+			"assigned_id":,
+			"title":,
+			"mill_floor":,
+			"battery_type":,
+			"battery_data":[
+				{
+					"timestamp":""
+				}
+			]
+			"sensors":[
+				{
+
+				}
+			]
+		},
+	]
+}

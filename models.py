@@ -2,6 +2,7 @@ from datetime import datetime
 from network import db, login_manager
 from flask_login import UserMixin
 import network.logs as log
+import json
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -39,6 +40,21 @@ class Device(db.Model):
 		obj = cls(**kw)
 		db.session.add(obj)
 		db.session.commit()
+
+	def remove(passed_id):
+		element = Device.query.filter_by(assigned_id=passed_id).first()
+		db.session.delete(element)
+		db.session.commit()
+
+	def change_title(passed_id, new_title):
+		element = Device.query.filter_by(assigned_id=passed_id).first()
+		element.title = new_title
+		db.session.commit()
+
+	def get_data(passed_id):
+		element = Device.query.filter_by(assigned_id=passed_id).first()
+		generate_json = f'{{"assigned_id":{element.assigned_id},"title":{element.title},"mill_floor":{element.mill_floor},"battery_type":{element.battery_type},"battery_data":{element.battery_data[:10]},"sensors":{element.sensors}}}'
+		return generate_json
 
 class BatteryData(db.Model):
 	__bind_key__ = 'network'

@@ -47,6 +47,10 @@ def do_once():
     #db.session.commit()
     return 'done'
 
+@app.route("/crash")
+def crash():
+    Device.create()
+
 @app.route("/config/new/<config_option>", methods=['GET','POST'])
 def form_new(config_option):
     if(config_option == 'device'):
