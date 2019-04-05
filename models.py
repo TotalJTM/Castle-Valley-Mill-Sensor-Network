@@ -41,12 +41,12 @@ class Device(db.Model):
 		db.session.add(obj)
 		db.session.commit()
 
-	def remove(passed_id):
+	def remove(passed_device_id):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		db.session.delete(element)
 		db.session.commit()
 
-	def change_title(passed_id, new_title):
+	def change_title(passed_device_id, new_title):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		element.title = new_title
 		db.session.commit()
@@ -55,6 +55,31 @@ class Device(db.Model):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		generate_json = f'{{"assigned_id":{element.assigned_id},"title":{element.title},"mill_floor":{element.mill_floor},"battery_type":{element.battery_type},"battery_data":{element.battery_data[:10]},"sensors":{element.sensors}}}'
 		return generate_json
+
+	def new_sensor(passed_id,sensor_id,sensor_title=None,sensor_type):
+		element = Device.query.filter_by(assigned_id=passed_device_id).first()
+		new_sensor = Sensor(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,sensor_type=form.entry_sensor_type.data)
+		Device.new_sensor(form.entry_device_id, )
+		element.sensors.append(new_sensor)
+		db.session.add(obj)
+		db.session.commit()
+
+	def remove_sensor(passed_id,sensor_id):
+		element = Device.query.filter_by(assigned_id=passed_device_id).first()
+		db.session.delete(element)
+		db.session.commit()
+
+	def get_sensor_data(passed_id,sensor_id,nDatapoints):
+		element = Device.query.filter_by(assigned_id=passed_device_id).first()
+		generate_json = f'{{"assigned_id":{element.assigned_id},"title":{element.title},"sensor_data":{element.sensor_data[:10]}}}'
+		return generate_json
+		db.session.commit()
+
+	def add_sensor_data(passed_id,sensor_id,data):
+		element = Device.query.filter_by(assigned_id=passed_device_id).first()
+		db.session.add(obj)
+		db.session.commit()
+
 
 class BatteryData(db.Model):
 	__bind_key__ = 'network'
@@ -74,35 +99,17 @@ class Sensor(db.Model):
 	events = db.relationship('SensorEvent', backref='sensor', lazy=True)
 	parent_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
 
-	def __init__(self,assigned_id,sensor_type):
+	def __init__(self,assigned_id,title=None,sensor_type):
 		self.assigned_id = assigned_id
 		self.title = title
 		self.sensor_type = sensor_type
+		
 
 	@classmethod
 	def create(cls, **kw):
 		obj = cls(**kw)
 		db.session.add(obj)
 		db.session.commit()
-
-	def remove(passed_id):
-		element = Sensor.query.filter_by(assigned_id=passed_id).first()
-		db.session.delete(element)
-		db.session.commit()
-
-	def change_title(passed_id, new_title):
-		element = Sensor.query.filter_by(assigned_id=passed_id).first()
-		element.title = new_title
-		db.session.commit()
-
-	def get_data(passed_id):
-		element = Sensor.query.filter_by(assigned_id=passed_id).first()
-		generate_json = f'{{"assigned_id":{element.assigned_id},"title":{element.title},"sensor_type":{element.sensor_type},}}'
-		return generate_json
-
-
-
-
 
 
 class SensorData(db.Model):
@@ -120,19 +127,3 @@ class SensorEvent(db.Model):
 	threshold_comparator = db.Column(db.String(2), unique=False, nullable=False)
 	parent_id = db.Column(db.Integer, db.ForeignKey('sensor.id'), nullable=False)
 
-
-
-
-
-class SensorForm(FlaskForm):
-	entry_assigned_id = StringField('Sensor ID', validators=[DataRequired()])
-	entry_title = StringField('Sensor Name')
-	entry_sensor_type = IntegerField('Sensor Type', validators=[DataRequired()])
-
-	def validate_entry_assigned_id(self, entry_assigned_id):							
-		val = Sensor.query.filter_by(assigned_id=entry_assigned_id.data).first()		
-		if(val is not None):															
-			raise ValidationError('Sensor already exists with that ID')
-
-
-			
