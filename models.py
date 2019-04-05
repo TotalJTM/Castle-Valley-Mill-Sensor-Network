@@ -66,7 +66,7 @@ class BatteryData(db.Model):
 class Sensor(db.Model):
 	__bind_key__ = 'network'
 	id = db.Column(db.Integer, primary_key=True)
-	assigned_id = db.Column(db.Integer, unique=True, nullable=False)
+	assigned_id = db.Column(db.Integer, unique=False, nullable=False)
 	title = db.Column(db.String(30), unique=False, nullable=True)
 	sensor_type = db.Column(db.String(12), unique=False, nullable=False)
 	parse_ind = db.Column(db.String(10), unique=False, nullable=True)
