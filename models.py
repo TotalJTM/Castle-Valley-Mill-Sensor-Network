@@ -74,6 +74,37 @@ class Sensor(db.Model):
 	events = db.relationship('SensorEvent', backref='sensor', lazy=True)
 	parent_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
 
+	def __init__(self,assigned_id,sensor_type):
+		self.assigned_id = assigned_id
+		self.title = title
+		self.sensor_type = sensor_type
+
+	@classmethod
+	def create(cls, **kw):
+		obj = cls(**kw)
+		db.session.add(obj)
+		db.session.commit()
+
+	def remove(passed_id):
+		element = Sensor.query.filter_by(assigned_id=passed_id).first()
+		db.session.delete(element)
+		db.session.commit()
+
+	def change_title(passed_id, new_title):
+		element = Sensor.query.filter_by(assigned_id=passed_id).first()
+		element.title = new_title
+		db.session.commit()
+
+	def get_data(passed_id):
+		element = Sensor.query.filter_by(assigned_id=passed_id).first()
+		generate_json = f'{{"assigned_id":{element.assigned_id},"title":{element.title},"sensor_type":{element.sensor_type},}}'
+		return generate_json
+
+
+
+
+
+
 class SensorData(db.Model):
 	__bind_key__ = 'network'
 	id = db.Column(db.Integer, primary_key=True)
@@ -88,3 +119,20 @@ class SensorEvent(db.Model):
 	threshold_val = db.Column(db.String(20), unique=False, nullable=False)
 	threshold_comparator = db.Column(db.String(2), unique=False, nullable=False)
 	parent_id = db.Column(db.Integer, db.ForeignKey('sensor.id'), nullable=False)
+
+
+
+
+
+class SensorForm(FlaskForm):
+	entry_assigned_id = StringField('Sensor ID', validators=[DataRequired()])
+	entry_title = StringField('Sensor Name')
+	entry_sensor_type = IntegerField('Sensor Type', validators=[DataRequired()])
+
+	def validate_entry_assigned_id(self, entry_assigned_id):							
+		val = Sensor.query.filter_by(assigned_id=entry_assigned_id.data).first()		
+		if(val is not None):															
+			raise ValidationError('Sensor already exists with that ID')
+
+
+			
