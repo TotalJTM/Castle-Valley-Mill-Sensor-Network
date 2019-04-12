@@ -60,7 +60,7 @@ class Device(db.Model):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		display_data = []
 		counter = 0
-		for i in reversed(j.battery_data):
+		for i in reversed(element.battery_data):
 			if counter < nDatapoints:
 				display_data.append(f'{{"data":{i.data},"timestamp":{i.timestamp}}}')
 		generate_json = f'{{"assigned_id":{element.assigned_id},"title":{element.title},"mill_floor":{element.mill_floor},"battery_type":{element.battery_type},"battery_data":{element.battery_data[:10]},"sensors":{element.sensors}}}'
@@ -104,6 +104,7 @@ class Device(db.Model):
 		element.battery_data.append(data_entry)
 		db.session.commit()
 
+	# def sensor_event(passed_id,new)
 
 class BatteryData(db.Model):
 	__bind_key__ = 'network'

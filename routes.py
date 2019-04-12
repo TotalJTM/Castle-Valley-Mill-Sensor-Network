@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request, session
 from network import app, db, bcrypt
-from network.forms import LoginForm, DeviceForm
+from network.forms import LoginForm, DeviceForm, SensorForm
 from network.models import User, Device, Sensor, SensorEvent
 from flask_login import login_user, current_user, logout_user, login_required
 import network.logs as log
@@ -9,7 +9,7 @@ import network.logs as log
 @app.route("/")
 @login_required
 def home():
-	return render_template('layout.html')
+    return render_template('layout.html')
 
 #@app.route("/dashboard/")
 #@login_required
@@ -36,8 +36,8 @@ def login():
 
 @app.route("/logout")
 def logout():
-	logout_user()
-	return redirect(url_for('home'))
+    logout_user()
+    return redirect(url_for('home'))
 
 @app.route("/once")
 def do_once():
@@ -60,9 +60,25 @@ def form_new(config_option):
             return redirect(url_for('view_devices'))
         return render_template('deviceform.html', form=form)
 
+    if(config_option == 'sensor'):
+        form = SensorForm(request.form)
+        if(request.method == 'POST' and form.validate_on_submit()):
+            element = Device.query.filter_by(assigned_id=form.entry_device_id).first()
+            Device.new_sensor(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,sensor_type=form.entry_sensor_type.data)
+            return redirect(url_for('view_sensors'))
+        return render_template('sensorform.html', form=form)
+
+    # if(config_option == 'event'):
+        # form = SensorEventForm(request.form)
+        # if(request.method == 'POST' and form.validate_on_submit()):
+            # element = Device.query.filter_by(assigned_id=form.entry_device_id).first()
+            # sensor_event = Sensor(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,sensor_type=form.entry_sensor_type.data)
+
+
 @app.route("/config/view/device", methods=['GET'])
-def view_devices():
-    j = ""
+def view_device():
+    j = "\n"
     for i in Device.query.all():
-        j+=f"{i.assigned_id},"
+        j+=Device.get_data(i.assigned_id)
+        j+="\n"
     return j

@@ -1,0 +1,14 @@
+{% extends "layout.html" -%}
+{% block content -%}
+{% from "_formhelper.html" import render_field %}
+<form method="POST">
+  {{ form.hidden_tag() }}
+  <dl>
+    {{ render_field(form.entry_assigned_id) }}
+    {{ render_field(form.entry_title) }}
+    {{ render_field(form.entry_sensor_type) }}
+    {{ render_field(form.entry_sensor_data) }}
+  </dl>
+  <p><input type=submit value=Register>
+</form>
+{% endblock content %}
