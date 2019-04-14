@@ -1,0 +1,14 @@
+{% extends "layout.html" -%}
+{% block content -%}
+{% from "_formhelper.html" import render_field %}
+<form method="GET">
+  {{ form.hidden_tag() }}
+  <dl>
+    {{ render_field(form.entry_assigned_id) }}
+    {{ render_field(form.entry_title) }}
+    {{ render_field(form.entry_mill_floor) }}
+    {{ render_field(form.entry_battery_type) }}
+  </dl>
+  <p><input type=submit value=Register>
+</form>
+{% endblock content %}
