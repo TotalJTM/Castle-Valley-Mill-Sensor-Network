@@ -1,0 +1,4 @@
+print(Device.get_data('000001'))
+Device.new_sensor('000001','1','valve','valve 1')
+print(Device.get_sensor_data('000001',1,5))
+Device.new_sensor_data('000001',1,'10')

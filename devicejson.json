@@ -1,0 +1,18 @@
+{
+	"id":"000001",
+	"network_key":"x$JdPhazq^OA|fR",
+	"battery_type":1,
+	"battery_level":4.0,
+	"sensors":[
+		{
+			"id":1,
+			"type":"valve",
+			"data":"10"
+		},
+		{
+			"id":2,
+			"type":"valve",
+			"data":"01"
+		}
+	]
+}

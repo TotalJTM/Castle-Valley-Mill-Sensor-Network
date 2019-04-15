@@ -67,10 +67,13 @@ class Device(db.Model):
 		return generate_json
 
 	def new_sensor(passed_id,sensor_id,sensor_type,sensor_title=None):
-		element = Device.query.filter_by(assigned_id=passed_id).first()
-		new_sensor = Sensor(assigned_id=sensor_id,title=sensor_title,sensor_type=sensor_type)
-		element.sensors.append(new_sensor)
-		db.session.commit()
+		element = Device.query.filter_by(assigned_id=str(passed_id)).first()
+		if element:
+			new_sensor = Sensor(assigned_id=str(sensor_id),title=sensor_title,sensor_type=str(sensor_type))
+			element.sensors.append(new_sensor)
+			db.session.commit()
+		else:
+			return 'err-nodevice'
 
 	def remove_sensor(passed_id,sensor_id):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
@@ -109,7 +112,7 @@ class Device(db.Model):
 class BatteryData(db.Model):
 	__bind_key__ = 'network'
 	id = db.Column(db.Integer, primary_key=True)
-	data = db.Column(db.Integer, unique=False, nullable=False)
+	data = db.Column(db.Float, unique=False, nullable=False)
 	timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 	parent_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
 
