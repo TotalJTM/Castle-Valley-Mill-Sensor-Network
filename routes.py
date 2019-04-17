@@ -68,14 +68,14 @@ def form_new(config_option):
             return redirect(url_for('view/sensors'))
         return render_template('sensorform.html', form=form)
 
-@app.route("/config/remove/<config_option>", methods=['GET'])
-def form_remove(config_option):
-    if(config_option == 'device'):
-        form = DeviceForm2(request.form)
-        if(request.method == 'GET' and form.validate_on_submit()):
-            remove_device = Device.remove(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,mill_floor=form.entry_mill_floor.data,battery_type=form.entry_battery_type.data)
-            return redirect(url_for('view/devices'))
-        return render_template('deviceform2.html', form=form)
+#@app.route("/config/remove/<config_option>", methods=['GET'])
+#def form_remove(config_option):
+#    if(config_option == 'device'):
+#        form = DeviceForm2(request.form)
+#        if(request.method == 'GET' and form.validate_on_submit()):
+#            remove_device = Device.remove(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,mill_floor=form.entry_mill_floor.data,battery_type=form.entry_battery_type.data)
+#            return redirect(url_for('view/devices'))
+#        return render_template('deviceform2.html', form=form)
 
 
     # if(config_option == 'event'):

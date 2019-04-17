@@ -20,15 +20,6 @@ class DeviceForm(FlaskForm):
 		if(val is not None):															#throw error if id already exists
 			raise ValidationError('Device already exists with that ID')
 
-
-class DeviceForm2(FlaskForm):
-	entry_assigned_id = StringField('Device ID', validators=[DataRequired()])
-
-	def validate_entry_assigned_id(self, entry_assigned_id):							#custom validators must be the same name as assigned above
-		val = Device.query.filter_by(assigned_id=entry_assigned_id.data).first()		#check for first entry with entered id (only unique field in model)
-		if(val is None):															#throw error if id already exists
-			raise Validation('Device has been removed')
-
 class SensorForm(FlaskForm):
 	entry_device_id = StringField('Device ID', validators=[DataRequired()])
 	entry_assigned_id = StringField('Sensor ID', validators=[DataRequired()])
@@ -40,3 +31,9 @@ class SensorForm(FlaskForm):
 		if(val is not None):															
 			raise ValidationError('Sensor already exists with that ID')
 
+class SensorEventForm(FlaskForm):
+	entry_device_id = StringField('Device ID', validators=[DataRequired()])
+	entry_title = StringField('Sensor Name')
+	entry_threshold_val = StringField('Threshold Value', validators=[DataRequired()])
+	entry_threshold_comparator = StringField('Threshold Comparator' validators=[DataRequired()])
+	entry_on_event = StringField('On Event Error', validators=[DataRequired()])
