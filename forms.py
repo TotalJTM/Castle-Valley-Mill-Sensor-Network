@@ -25,3 +25,15 @@ class SensorForm(FlaskForm):
 	entry_assigned_id = StringField('Sensor ID', validators=[DataRequired()])
 	entry_title = StringField('Sensor Name')
 	entry_sensor_type = StringField('Sensor Type', validators=[DataRequired()])
+
+	def validate_entry_assigned_id(self, entry_assigned_id):							
+		val = Sensor.query.filter_by(assigned_id=entry_assigned_id.data).first()		
+		if(val is not None):															
+			raise ValidationError('Sensor already exists with that ID')
+
+class SensorEventForm(FlaskForm):
+	entry_device_id = StringField('Device ID', validators=[DataRequired()])
+	entry_title = StringField('Sensor Name')
+	entry_threshold_val = StringField('Threshold Value', validators=[DataRequired()])
+	entry_threshold_comparator = StringField('Threshold Comparator' validators=[DataRequired()])
+	entry_on_event = StringField('On Event Error', validators=[DataRequired()])

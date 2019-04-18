@@ -16,7 +16,14 @@
 			]
 			"sensors":[
 				{
-
+					"device_id"
+					"assigned_id"
+					"title"
+					"sensor_type":[
+						{
+						"timestamp":""
+						}
+					]
 				}
 			]
 		},

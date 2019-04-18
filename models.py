@@ -107,7 +107,13 @@ class Device(db.Model):
 		element.battery_data.append(data_entry)
 		db.session.commit()
 
-	# def sensor_event(passed_id,new)
+	def new_event(passed_id,sensor_id,threshold_val,threshold_comparator,title)
+		element = Device.query.filter_by(assigned_id=passed_id).first()
+		new_event = SensorEvent(event=new_event)
+		for j in element.sensor
+		j.events.append(Event)
+
+
 
 class BatteryData(db.Model):
 	__bind_key__ = 'network'
@@ -140,4 +146,26 @@ class SensorEvent(db.Model):
 	title = db.Column(db.String(20), unique=False, nullable=True)
 	threshold_val = db.Column(db.String(20), unique=False, nullable=False)
 	threshold_comparator = db.Column(db.String(2), unique=False, nullable=False)
+	on_event = db.Column(db.String(20), unique=False, nullable=False)
 	parent_id = db.Column(db.Integer, db.ForeignKey('sensor.id'), nullable=False)
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
