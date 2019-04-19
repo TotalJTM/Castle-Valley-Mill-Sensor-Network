@@ -1,0 +1,62 @@
+header
+{
+	background-color: #800000;
+	border: #000000 3px solid;
+	padding-bottom: 3px;
+	margin-bottom: 5px;
+	height: 30px;
+}
+
+#masthead_time
+{
+	color: white;
+	text-align: left;
+}
+
+#masthead_usertitle
+{
+	color: white;
+	text-align: right;
+}
+
+a.nav-link
+{
+	color: white;
+	text-decoration: none;
+}
+
+main
+{
+	margin-bottom: 30px;
+	padding: 20px;
+	margin-top: 15px;
+}
+
+a.floor-links
+{
+	color: black;
+	text-decoration: none;
+	float: left;
+}
+
+li
+{
+	float: left;
+	margin: 25px;
+	padding: 3px;
+	border: black 1px solid;
+	list-style-type: none;
+}
+
+footer
+{
+	margin-top: 50px;
+	position: absolute;
+}
+
+.container
+{
+	margin: 20px;
+	padding: 10px;
+	border: black 3px solid;
+}

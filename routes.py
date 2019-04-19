@@ -11,7 +11,7 @@ from network.serversecrets import DEVICE_KEY
 @app.route("/")
 @login_required
 def home():
-    return render_template('layout.html')
+    return render_template('website.html')
 
 #@app.route("/dashboard/")
 #@login_required
@@ -138,3 +138,33 @@ def handle_device():
 @app.route("/server/retrieve", methods=['POST'])
 def serve_device():
     return ooo
+
+@app.route("/floor/first", methods=["GET"])
+def serve_floor_first():
+    data = f'{{"user":{{"user_current":"totalJTM","user_permission":"super"}},"header":{{"masthead_time":"April 5th, 3:15 PM"}}}}'
+    data = json.loads(data)
+    return render_template('website.html', data=data)
+
+@app.route("/floor/second", methods=["GET"])
+def serve_floor_second():
+    data = f'{{"user":{{"user_current":"totalJTM","user_permission":"super"}},"header":{{"masthead_time":"April 5th, 3:15 PM"}}}}'
+    data = json.loads(data)
+    return render_template('website.html', data=data)
+
+@app.route("/floor/third", methods=["GET"])
+def serve_floor_third():
+    data = f'{{"user":{{"user_current":"totalJTM","user_permission":"super"}},"header":{{"masthead_time":"April 5th, 3:15 PM"}}}}'
+    data = json.loads(data)
+    return render_template('website.html', data=data)
+
+@app.route("/floor/basement", methods=["GET"])
+def serve_floor_basement():
+    data = f'{{"user":{{"user_current":"totalJTM","user_permission":"super"}},"header":{{"masthead_time":"April 5th, 3:15 PM"}}}}'
+    data = json.loads(data)
+    return render_template('website.html', data=data)
+
+@app.route("/config", methods=["GET"])
+def serve_config():
+    data = f'{{"user":{{"user_current":"totalJTM","user_permission":"super"}},"header":{{"masthead_time":"April 5th, 3:15 PM"}}}}'
+    data = json.loads(data)
+    return render_template('website.html', data=data)

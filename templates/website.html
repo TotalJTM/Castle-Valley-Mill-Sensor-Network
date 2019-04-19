@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title> Sensor data</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<script src="practice1.js"> </script>
+
+		<script type="text/javascript" charset="utf-8">
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        socket.on('sensor_update', function(rdata){
+          var data = JSON.parse(rdata);
+          $(document.getElementById(data.nodeID+"battery")).text("Battery Level: "+data.batteryReadings[0]);
+          $(document.getElementById(data.nodeID+"lastresp")).text("Last Response: "+data.lastResponse[0]);
+          for(var i=0;i < data.sensors.length;i++){
+            var sens = data.sensors[i]
+            $(document.getElementById(data.nodeID+sens.sensorID+"val")).text(sens.sensorData[0]);
+          }//data.sensors[i].sensorID+
+        });
+
+        socket.on('new_sensor', function(data){
+          document.location.reload()
+        });
+      </script>
+		<!--{{ url_for('static', filename='main.css') }}-->
+	</head>
+	<body>
+		<header>
+			<div class="header-element;display:inline-block;">
+					<span id="masthead_time" style="float:left;">{{data.header.masthead_time}}</span>
+					{% if data.user.user_current %}
+			 			<span id="masthead_usertitle" style="float:right;">Hello {{data.user.user_current}} <a class="nav-link" href="{{url_for('logout')}}"> Logout</a></span>
+			 		{%endif%}
+			 </div>
+		</header>
+		<main>
+			<div class="masthead-floors"> <ul>
+				<div> 
+					<li><a class="floor-links" href="{{url_for('serve_floor_first')}}">Floor 1</a> </li>
+				</div>
+
+				<div>
+					<li><a class="floor-links" href="{{url_for('serve_floor_second')}}">Floor 2</a> </li>
+				</div>
+
+				<div>
+					<li><a class="floor-links" href="{{url_for('serve_floor_third')}}">Floor 3</a></li>
+				</div>
+
+				<div>
+					<li><a class="floor-links" href="{{url_for('serve_floor_basement')}}">Basement</a></li>
+				</div>
+
+				<div>
+					<li><a class="floor-links" href="{{url_for('serve_config')}}">Configuration</a></li>
+				</div>
+			</ul></div>
+		</main>
+		<footer>
+			<div class="container">
+				<p3> Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.  </p3>
+			</div>
+		</footer>
+	</body>
+</html>
