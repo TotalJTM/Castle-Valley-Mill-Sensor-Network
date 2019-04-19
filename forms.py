@@ -35,5 +35,5 @@ class SensorEventForm(FlaskForm):
 	entry_device_id = StringField('Device ID', validators=[DataRequired()])
 	entry_title = StringField('Sensor Name')
 	entry_threshold_val = StringField('Threshold Value', validators=[DataRequired()])
-	entry_threshold_comparator = StringField('Threshold Comparator' validators=[DataRequired()])
+	entry_threshold_comparator = StringField('Threshold Comparator', validators=[DataRequired()])
 	entry_on_event = StringField('On Event Error', validators=[DataRequired()])

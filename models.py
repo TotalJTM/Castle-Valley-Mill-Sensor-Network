@@ -34,7 +34,7 @@ class Device(db.Model):
 	battery_data = db.relationship('BatteryData', backref='device', lazy=True)
 	sensors = db.relationship('Sensor', backref='device', lazy=False)
 
-	def __init__(self,assigned_id,title,mill_floor,battery_type):
+	def __init__(self,assigned_id,battery_type,title=None,mill_floor=None):
 		self.assigned_id = assigned_id
 		self.title = title
 		self.mill_floor = mill_floor
@@ -56,14 +56,15 @@ class Device(db.Model):
 		element.title = new_title
 		db.session.commit()
 
-	def get_data(passed_id):
+	def get_data(passed_id,nDatapoints=5):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		display_data = []
 		counter = 0
 		for i in reversed(element.battery_data):
 			if counter < nDatapoints:
 				display_data.append(f'{{"data":{i.data},"timestamp":{i.timestamp}}}')
-		generate_json = f'{{"assigned_id":{element.assigned_id},"title":{element.title},"mill_floor":{element.mill_floor},"battery_type":{element.battery_type},"battery_data":{element.battery_data[:10]},"sensors":{element.sensors}}}'
+				counter = counter+1
+		generate_json = f'{{"assigned_id":{element.assigned_id},"title":{element.title},"mill_floor":{element.mill_floor},"battery_type":{element.battery_type},"battery_data":{display_data},"sensors":{element.sensors}}}'
 		return generate_json
 
 	def new_sensor(passed_id,sensor_id,sensor_type,sensor_title=None):
@@ -89,6 +90,7 @@ class Device(db.Model):
 				for i in reversed(j.sensor_data):
 					if counter < nDatapoints:
 						display_data.append(f'{{"data":{i.data},"timestamp":{i.timestamp}}}')
+						counter = counter+1
 				generate_json = f'{{"assigned_id":{j.assigned_id},"title":{j.title},"sensor_type":{j.sensor_type},"sensor_data":{display_data}}}'		
 				return generate_json
 		return 'err-nosensor'
@@ -107,11 +109,11 @@ class Device(db.Model):
 		element.battery_data.append(data_entry)
 		db.session.commit()
 
-	def new_event(passed_id,sensor_id,threshold_val,threshold_comparator,title)
+	def new_event(passed_id,sensor_id,threshold_val,threshold_comparator,title=""):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		new_event = SensorEvent(event=new_event)
-		for j in element.sensor
-		j.events.append(Event)
+		for j in element.sensor:
+			j.events.append(Event)
 
 
 

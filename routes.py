@@ -1,10 +1,11 @@
 from flask import render_template, url_for, flash, redirect, request, session
 from network import app, db, bcrypt
-from network.forms import LoginForm, DeviceForm, SensorForm, DeviceForm2
+from network.forms import LoginForm, DeviceForm, SensorForm, DeviceForm
 from network.models import User, Device, Sensor, SensorEvent
 from flask_login import login_user, current_user, logout_user, login_required
 import network.logs as log
-import secrets
+import json
+from network.serversecrets import DEVICE_KEY
 #import network.nodes as nde
 
 @app.route("/")
@@ -109,21 +110,27 @@ def handle_device():
     message = request.data
     message = message.decode("utf-8")
     message = json.loads(message)
-    if message["network_key"] == secrets.DEVICE_KEYS:
+    log.logger.debug(message)
+    if message["network_key"] == DEVICE_KEY:
         if not Device.query.filter_by(assigned_id=message["id"]).first():
             #log.logger.debug(f"new dev on network {message["id"]}")
-            Device.create()
+            Device.create(assigned_id=message["id"],battery_type=message["battery_type"])
+            Device.new_battery_data(passed_id=message["id"],new_data=message["battery_level"])
+            for sensor in message["sensors"]:
+                Device.new_sensor(passed_id=message["id"],sensor_id=sensor["id"],sensor_type=sensor["type"])
+                Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
         else:
-            Device.new_battery_data(passed_id,bat_data)
-            for i in sensor_json:
+            Device.new_battery_data(passed_id=message["id"],new_data=message["battery_level"])
+            for sensor in message["sensors"]:
                 check_sensor = False
                 for j in Device.query.filter_by(assigned_id=message["id"]).first().sensors:
-                    if j.assigned_id == i["id"]:
-                        Device.new_sensor_data(passed_id,i["id"],i["data"])
+                    if j.assigned_id == sensor["id"]:
+                        Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
                         check_sensor = True
                 if not check_sensor:
-                    Device.new_sensor(message["id"],i["id"],i["type"])
-                    Device.new_sensor_data(message["id"],i["id"],i["data"])
+                    Device.new_sensor(passed_id=message["id"],sensor_id=sensor["id"],sensor_type=sensor["type"])
+                    Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
+    return 'done'
 
 @app.route("/server/retrieve", methods=['POST'])
 def serve_device():
