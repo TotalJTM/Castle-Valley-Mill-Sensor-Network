@@ -78,12 +78,15 @@ def form_new(config_option):
 #            return redirect(url_for('view/devices'))
 #        return render_template('deviceform2.html', form=form)
 
-
-    # if(config_option == 'event'):
-        # form = SensorEventForm(request.form)
-        # if(request.method == 'POST' and form.validate_on_submit()):
-            # element = Device.query.filter_by(assigned_id=form.entry_device_id).first()
-            # sensor_event = Sensor(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,sensor_type=form.entry_sensor_type.data)
+@app.route("/config/event/<config_option>", methods=['GET', 'POST'])
+def form_event(config_option):
+    if(config_option == 'sensorevent'):
+         form = SensorEventForm(request.form)
+         if(request.method == 'POST' and form.validate_on_submit()):
+             element = Device.query.filter_by(assigned_id=form.entry_device_id).first()
+             sensor_event = Sensor(assigned_id=form.entry_device_id.data,title=form.entry_title.data,threshold_val=form.entry_threshold_val.data,threshold_comparator=form.entry_threshold_comparator.data,onevent=form.entry_on_event.data)
+             return redirect(url_for('view/devices'))
+             return render_template('eventform.html', form=form)
 
 
 @app.route("/config/view/device", methods=['GET'])

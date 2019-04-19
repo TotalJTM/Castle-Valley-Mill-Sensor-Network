@@ -4,10 +4,11 @@
 <form method="POST">
   {{ form.hidden_tag() }}
   <dl>
-    {{ render_field(form.entry_assigned_id) }}
+    {{ render_field(form.entry_device_id) }}
     {{ render_field(form.entry_title) }}
-    {{ render_field(form.entry_sensor_type) }}
-    {{ render_field(form.entry_sensor_data) }}
+    {{ render_field(form.entry_threshold_val) }}
+    {{ render_field(form.entry_threshold_comparator) }}
+    {{ render_field(form.entry_on_event) }}
   </dl>
   <p><input type=submit value=Register>
 </form>
