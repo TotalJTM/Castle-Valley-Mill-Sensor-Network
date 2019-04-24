@@ -4,6 +4,7 @@ from network.forms import LoginForm, DeviceForm, SensorForm, DeviceForm
 from network.models import User, Device, Sensor, SensorEvent
 from flask_login import login_user, current_user, logout_user, login_required
 import network.logs as log
+from network.pagecompiler import get_header_json, get_full_device_sensor_list
 import json
 from network.serversecrets import DEVICE_KEY
 #import network.nodes as nde
@@ -11,7 +12,9 @@ from network.serversecrets import DEVICE_KEY
 @app.route("/")
 @login_required
 def home():
-    return render_template('website.html')
+    data = get_header_json()
+    data = json.loads(data)
+    return render_template('website.html', data=data)
 
 #@app.route("/dashboard/")
 #@login_required
@@ -30,6 +33,8 @@ def login():
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
+            session['username'] = user.username
+            session['perms'] = user.perms
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
             flash('Login Unsuccessful. Please check username and password', 'danger')

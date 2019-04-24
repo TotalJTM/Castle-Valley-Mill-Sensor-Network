@@ -4,6 +4,7 @@ from flask_login import UserMixin
 import network.logs as log
 import json
 
+
 @login_manager.user_loader
 def load_user(user_id):
 	if user_id:
@@ -150,24 +151,3 @@ class SensorEvent(db.Model):
 	threshold_comparator = db.Column(db.String(2), unique=False, nullable=False)
 	on_event = db.Column(db.String(20), unique=False, nullable=False)
 	parent_id = db.Column(db.Integer, db.ForeignKey('sensor.id'), nullable=False)
-
-
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
