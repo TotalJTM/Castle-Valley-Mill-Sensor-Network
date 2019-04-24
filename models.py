@@ -79,7 +79,9 @@ class Device(db.Model):
 
 	def remove_sensor(passed_id,sensor_id):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
-		db.session.delete(element)
+		for i in range(0,len(element.sensors)):
+			if element.sensors[i].assigned_id == sensor_id:
+				element.sensors.pop(i)
 		db.session.commit()
 
 	def get_sensor_data(passed_id,sensor_id,nDatapoints):
@@ -110,19 +112,27 @@ class Device(db.Model):
 		element.battery_data.append(data_entry)
 		db.session.commit()
 
-	def new_event(passed_id,sensor_id,threshold_val,threshold_comparator,title=""):
+	def new_sensor_event(passed_id,sensor_id,threshold_val,threshold_comparator,on_event,title=""):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
-		new_event = SensorEvent(event=new_event)
-		for j in element.sensor:
-			j.events.append(Event)
+		for i in element.sensors:
+			if i.assigned_id == sensor_id:
+				i.events.append(SensorEvent(threshold_val=threshold_val,threshold_comparator=threshold_comparator,on_event=on_event,title=title))
+		db.session.commit()
 
-
+	def remove_sensor_event(passed_id,sensor_id,database_event_id):
+		element = Device.query.filter_by(assigned_id=passed_id).first()
+		for i in element.sensors:
+			if i.assigned_id == sensor_id:
+				for j in range(0,len(i.events)):
+					if i.events[j].id == database_event_id:
+						i.events.pop(j)
+		db.session.commit()
 
 class BatteryData(db.Model):
 	__bind_key__ = 'network'
 	id = db.Column(db.Integer, primary_key=True)
 	data = db.Column(db.Float, unique=False, nullable=False)
-	timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+	timestamp = db.Column(db.DateTime, default=datetime.now)
 	parent_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
 
 class Sensor(db.Model):
@@ -140,7 +150,7 @@ class SensorData(db.Model):
 	__bind_key__ = 'network'
 	id = db.Column(db.Integer, primary_key=True)
 	data = db.Column(db.String(20), unique=False, nullable=False)
-	timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+	timestamp = db.Column(db.DateTime, default=datetime.now)
 	parent_id = db.Column(db.Integer, db.ForeignKey('sensor.id'), nullable=False)
 
 class SensorEvent(db.Model):

@@ -4,15 +4,15 @@ from network.forms import LoginForm, DeviceForm, SensorForm, DeviceForm
 from network.models import User, Device, Sensor, SensorEvent
 from flask_login import login_user, current_user, logout_user, login_required
 import network.logs as log
-from network.pagecompiler import get_header_json, get_full_device_sensor_list
+from network.pagecompiler import get_header_json, get_full_device_sensor_list, get_full_json
 import json
 from network.serversecrets import DEVICE_KEY
-#import network.nodes as nde
 
 @app.route("/")
 @login_required
 def home():
-    data = get_header_json()
+    data = get_full_json()
+    log.logger.debug(data)
     data = json.loads(data)
     return render_template('website.html', data=data)
 
@@ -64,7 +64,7 @@ def form_new(config_option):
         form = DeviceForm(request.form)
         if(request.method == 'POST' and form.validate_on_submit()):
             new_device = Device.create(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,mill_floor=form.entry_mill_floor.data,battery_type=form.entry_battery_type.data)
-            return redirect(url_for('view/devices'))
+            return redirect(url_for('view_devices'))
         return render_template('deviceform.html', form=form)
 
     if(config_option == 'sensor'):
