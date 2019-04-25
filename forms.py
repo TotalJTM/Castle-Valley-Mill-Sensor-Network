@@ -21,7 +21,7 @@ class DeviceForm(FlaskForm):
 			raise ValidationError('Device already exists with that ID')
 
 class SensorForm(FlaskForm):
-	entry_device_id = StringField('Device ID', validators=[DataRequired()])
+	#entry_device_id = StringField('Device ID', validators=[DataRequired()])
 	entry_assigned_id = StringField('Sensor ID', validators=[DataRequired()])
 	entry_title = StringField('Sensor Name')
 	entry_sensor_type = StringField('Sensor Type', validators=[DataRequired()])

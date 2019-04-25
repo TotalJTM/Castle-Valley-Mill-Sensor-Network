@@ -1,31 +1,50 @@
 {
 	"user":{
-		"user_current":"totalJTM",
+		"user_current":"TotalJTM",
 		"user_permission":"super"
-	}
-	"device":[
+	},
+	"header":{
+		"masthead_time":"Apr 24, 06:08"
+	},
+	"devices":[
 		{
-			"assigned_id":,
-			"title":,
-			"mill_floor":,
-			"battery_type":,
-			"battery_data":[
-				{
-					"timestamp":""
-				}
-			]
-			"sensors":[
-				{
-					"device_id"
-					"assigned_id"
-					"title"
-					"sensor_type":[
-						{
-						"timestamp":""
-						}
-					]
-				}
+		"assigned_id":"100001",
+		"title":"test dev",
+		"mill_floor":1,
+		"battery_type":1,
+		"battery_data":[],
+		"sensors":[
+			{
+				"assigned_id":"1",
+				"title":"sens 1",
+				"sensor_type":"dht",
+				"sensor_data":[],
+				"events":[]
+			},
+			{
+				"assigned_id":"2",
+				"title":"sens 2",
+				"sensor_type":"valve",
+				"sensor_data":[],
+				"events":[]
+			}
 			]
 		},
+		{
+		"assigned_id":"100002",
+		"title":"test dev2",
+		"mill_floor":2,
+		"battery_type":1,
+		"battery_data":[],
+		"sensors":[
+			{
+				"assigned_id":"1",
+				"title":"sens abc",
+				"sensor_type":"bearing",
+				"sensor_data":[],
+				"events":[]
+			}
+			]
+		}
 	]
 }

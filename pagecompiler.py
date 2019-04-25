@@ -61,7 +61,7 @@ def get_full_json(header=True,dev_sens_event=True,bat_data=True,sens_data=True,n
 							counter = counter+1
 							if counter != nDatapoints:
 								sensdata += ","
-				sensors += f'{{"assigned_id":"{j.assigned_id}","title":"{j.title}","sensor_type":"{j.sensor_type}","sensor_data":{sensdata},"events":{sensevent}}}'
+				sensors += f'{{"assigned_id":"{j.assigned_id}","title":"{j.title}","sensor_type":"{j.sensor_type}","sensor_data":{sensdata}],"events":{sensevent}]}}'
 				sens_count = sens_count + 1
 				if sens_count != len(i.sensors):
 					sensors += ","

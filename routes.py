@@ -58,8 +58,8 @@ def do_once():
 def crash():
     Device.create()
 
-@app.route("/config/new/<config_option>", methods=['GET', 'POST'])
-def form_new(config_option):
+@app.route("/config/new/<config_option>/<dev_num>", methods=['GET', 'POST'])
+def form_new(config_option,dev_num):
     if(config_option == 'device'):
         form = DeviceForm(request.form)
         if(request.method == 'POST' and form.validate_on_submit()):
@@ -70,8 +70,9 @@ def form_new(config_option):
     if(config_option == 'sensor'):
         form = SensorForm(request.form)
         if(request.method == 'POST' and form.validate_on_submit()):
-            Device.new_sensor(passed_id=form.entry_device_id.data,sensor_id=form.entry_assigned_id.data,sensor_title=form.entry_title.data,sensor_type=form.entry_sensor_type.data)
-            return redirect(url_for('view_sensors'))
+            Device.new_sensor(dev_num,sensor_id=form.entry_assigned_id.data,sensor_title=form.entry_title.data,sensor_type=form.entry_sensor_type.data)
+            return '<script>window.close()</script>'
+            #return redirect(url_for('view_sensors'))
         return render_template('sensorform.html', form=form)
 
 #@app.route("/config/remove/<config_option>", methods=['GET'])
@@ -170,6 +171,6 @@ def serve_floor_basement():
 
 @app.route("/config", methods=["GET"])
 def serve_config():
-    data = f'{{"user":{{"user_current":"totalJTM","user_permission":"super"}},"header":{{"masthead_time":"April 5th, 3:15 PM"}}}}'
+    data = get_full_json()
     data = json.loads(data)
-    return render_template('website.html', data=data)
+    return render_template('config.html', data=data)

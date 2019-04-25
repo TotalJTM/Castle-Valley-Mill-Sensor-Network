@@ -5,7 +5,8 @@
 		<meta name="viewport" content="width=device-width">
 		<title> Sensor data</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-		<script src="practice1.js"> </script>
+		<!-- Bootstrap CSS -->
+    	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
 
 		<script type="text/javascript" charset="utf-8">
         var socket = io.connect('http://' + document.domain + ':' + location.port);
@@ -33,9 +34,8 @@
 			 			<span id="masthead_usertitle" style="float:right;">Hello {{data.user.user_current}} <a class="nav-link" href="{{url_for('logout')}}"> Logout</a></span>
 			 		{%endif%}
 			 </div>
-		</header>
-		<main>
-			<div class="masthead-floors"> <ul>
+			 <div class="masthead-floors"> 
+				<ul>
 				<div> 
 					<li><a class="floor-links" href="{{url_for('serve_floor_first')}}">Floor 1</a> </li>
 				</div>
@@ -56,12 +56,13 @@
 					<li><a class="floor-links" href="{{url_for('serve_config')}}">Configuration</a></li>
 				</div>
 				{% endif %}
-			</ul></div>
-		</main>
-		<footer>
+				</ul>
+			</div>
+		</header>
+		<main>
 			<div class="container">
 				{% block content %}{% endblock content %}
 			</div>
-		</footer>
+		</main>
 	</body>
 </html>

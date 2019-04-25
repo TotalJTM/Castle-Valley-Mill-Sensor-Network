@@ -1,0 +1,61 @@
+{% extends "website.html" %}
+{% block content %}
+<style>
+#customers {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#customers td, #customers th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#customers th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+}
+</style>
+<table id="customers" style="width:100%">
+	<tr>
+		<th>Devices in System</th>
+		<th>Sensors</th>
+	</tr>
+	{% for dev in data.devices %}
+	<tr>
+		<td rowspan='{{dev.sensors|length}}'>{{dev.assigned_id}}, {{dev.title}}
+			<button id="{{dev.assigned_id}}|" type="button" class="btn btn-default btn-sm" style="float:right" onclick="updateConfig(this.id,'remove');return false;">
+				<span>- Remove Device</span>
+        	</button>
+			<button id="{{dev.assigned_id}}|" type="button" class="btn btn-default btn-sm" style="float:right" onclick="window.open('/config/new/sensor/{{dev.assigned_id}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">
+				<span>&#x2b; New Sensor</span>
+        	</button>
+        </td>
+		{% for sens in dev.sensors %}
+    	<td>{{sens.assigned_id}}, {{sens.title}}
+    		<button id="{{dev.assigned_id}}|{{sens.assigned_id}}" type="button" class="btn btn-default btn-sm" style="float:right" onclick="updateConfig(this.id,'remove');return false;">
+				<span>- Remove Sensor</span>
+        	</button>
+        	{% if sens.events|length > 0 %}
+        		<button type="button" class="btn btn-default btn-sm" style="float:right" onclick="">
+					<span>View Events</span>
+        		</button>
+        	{% else %}
+        		<button type="button" class="btn btn-default btn-sm" style="float:right" onclick="">
+					<span>&#x2b; Add Event</span>
+        		</button>
+        	{% endif %}
+        </td>
+  	</tr>
+		{% endfor %}
+	{% endfor %}
+</table>
+<script>
+    function updateConfig(idName, action){
+        var pathArray = window.location.pathname.split('/');
+        socket.emit('handleconfig', {'id':String(idName),'action':String(action)});
+     }
+</script>
+{% endblock content %}
