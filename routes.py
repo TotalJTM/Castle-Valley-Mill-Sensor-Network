@@ -1,5 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request, session
-from network import app, db, bcrypt
+from flask_socketio import SocketIO
+from network import app, db, bcrypt, socketio
 from network.forms import LoginForm, DeviceForm, SensorForm, DeviceForm
 from network.models import User, Device, Sensor, SensorEvent
 from flask_login import login_user, current_user, logout_user, login_required
@@ -12,16 +13,9 @@ from network.serversecrets import DEVICE_KEY
 @login_required
 def home():
     data = get_full_json()
-    log.logger.debug(data)
     data = json.loads(data)
+    log.logger.debug(data)
     return render_template('website.html', data=data)
-
-#@app.route("/dashboard/")
-#@login_required
-#def dashboard():
-#    log.logger.debug("main display served")
-#    log.logger.debug(nodeList)
-#    return render_template('dashboard.html',page_data=nde.get_node_json())
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -58,13 +52,15 @@ def do_once():
 def crash():
     Device.create()
 
+@login_required
 @app.route("/config/new/<config_option>/<dev_num>", methods=['GET', 'POST'])
 def form_new(config_option,dev_num):
     if(config_option == 'device'):
         form = DeviceForm(request.form)
         if(request.method == 'POST' and form.validate_on_submit()):
             new_device = Device.create(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,mill_floor=form.entry_mill_floor.data,battery_type=form.entry_battery_type.data)
-            return redirect(url_for('view_devices'))
+            #return redirect(url_for('view_devices'))
+            return '<script>window.close()</script>'
         return render_template('deviceform.html', form=form)
 
     if(config_option == 'sensor'):
@@ -75,6 +71,20 @@ def form_new(config_option,dev_num):
             #return redirect(url_for('view_sensors'))
         return render_template('sensorform.html', form=form)
 
+@socketio.on('handle_config')
+def handle_config(json_data):
+    id_name = json_data['id']
+    id_name = id_name.split('|')
+    action = json_data['action']
+    log.logger.debug(id_name)
+    if action == "remove":
+        if id_name[1]:
+            Device.remove_sensor(id_name[0],id_name[1])
+            socketio.emit('reload', True)
+        else:
+            Device.remove(id_name[0])
+            socketio.emit('reload', True)
+
 #@app.route("/config/remove/<config_option>", methods=['GET'])
 #def form_remove(config_option):
 #    if(config_option == 'device'):
@@ -84,6 +94,7 @@ def form_new(config_option,dev_num):
 #            return redirect(url_for('view/devices'))
 #        return render_template('deviceform2.html', form=form)
 
+@login_required
 @app.route("/config/event/<config_option>", methods=['GET', 'POST'])
 def form_event(config_option):
     if(config_option == 'sensorevent'):
@@ -94,7 +105,7 @@ def form_event(config_option):
              return redirect(url_for('view/devices'))
              return render_template('eventform.html', form=form)
 
-
+"""
 @app.route("/config/view/device", methods=['GET'])
 def view_devices():
     j = ""
@@ -113,6 +124,7 @@ def view_sensors():
             j+=Device.get_sensor_data(i.assigned_id,q.assigned_id,4)
             j+="<br/>"
     return j
+"""
 
 @app.route("/server/update", methods=['POST'])
 def handle_device():
@@ -147,30 +159,34 @@ def serve_device():
 
 @app.route("/floor/first", methods=["GET"])
 def serve_floor_first():
-    data = f'{{"user":{{"user_current":"totalJTM","user_permission":"super"}},"header":{{"masthead_time":"April 5th, 3:15 PM"}}}}'
+    data = get_full_json()
     data = json.loads(data)
     return render_template('website.html', data=data)
 
 @app.route("/floor/second", methods=["GET"])
 def serve_floor_second():
-    data = f'{{"user":{{"user_current":"totalJTM","user_permission":"super"}},"header":{{"masthead_time":"April 5th, 3:15 PM"}}}}'
+    data = get_full_json()
     data = json.loads(data)
     return render_template('website.html', data=data)
 
 @app.route("/floor/third", methods=["GET"])
 def serve_floor_third():
-    data = f'{{"user":{{"user_current":"totalJTM","user_permission":"super"}},"header":{{"masthead_time":"April 5th, 3:15 PM"}}}}'
+    data = get_full_json()
     data = json.loads(data)
     return render_template('website.html', data=data)
 
 @app.route("/floor/basement", methods=["GET"])
 def serve_floor_basement():
-    data = f'{{"user":{{"user_current":"totalJTM","user_permission":"super"}},"header":{{"masthead_time":"April 5th, 3:15 PM"}}}}'
+    data = get_full_json()
     data = json.loads(data)
     return render_template('website.html', data=data)
 
+@login_required
 @app.route("/config", methods=["GET"])
 def serve_config():
     data = get_full_json()
     data = json.loads(data)
-    return render_template('config.html', data=data)
+    if session["perms"] == "super":
+        return render_template('config.html', data=data)
+    else:
+        return "You do not have correct permissions for this section"

@@ -1,5 +1,14 @@
 {% extends "website.html" %}
 {% block content %}
+<script>
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+      socket.on('reload', function(data){
+        window.location.reload(true)
+      });
+    function updateConfig(id_name, action){
+        socket.emit('handle_config', {'id':String(id_name),'action':String(action)});
+     }
+</script>
 <style>
 #customers {
   font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
@@ -20,7 +29,11 @@
 </style>
 <table id="customers" style="width:100%">
 	<tr>
-		<th>Devices in System</th>
+		<th>Devices in System
+    <button type="button" class="btn btn-default btn-sm" style="float:right" onclick="window.open('/config/new/device/0','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">
+        <span>&#x2b; New Device</span>
+    </button>
+        </th>
 		<th>Sensors</th>
 	</tr>
 	{% for dev in data.devices %}
@@ -35,7 +48,7 @@
         </td>
 		{% for sens in dev.sensors %}
     	<td>{{sens.assigned_id}}, {{sens.title}}
-    		<button id="{{dev.assigned_id}}|{{sens.assigned_id}}" type="button" class="btn btn-default btn-sm" style="float:right" onclick="updateConfig(this.id,'remove');return false;">
+    		<button id="{{dev.assigned_id}}|{{sens.assigned_id}}" type="button" class="btn btn-default btn-sm" style="float:right" onclick="updateConfig(this.id,'remove'); return false;">
 				<span>- Remove Sensor</span>
         	</button>
         	{% if sens.events|length > 0 %}
@@ -52,10 +65,4 @@
 		{% endfor %}
 	{% endfor %}
 </table>
-<script>
-    function updateConfig(idName, action){
-        var pathArray = window.location.pathname.split('/');
-        socket.emit('handleconfig', {'id':String(idName),'action':String(action)});
-     }
-</script>
 {% endblock content %}

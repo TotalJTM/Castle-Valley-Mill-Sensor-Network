@@ -44,15 +44,16 @@ li
 	float: left;
 	margin: 50px;
 	padding:4px;
-	padding-left: 70px;
-	padding-right: 70px;
+	padding-left: 3%;
+	padding-right: 3%;
 	border: black 1px solid;
 	list-style-type: none;
 }
 
 .container
 {
-	margin: 40px;
+	margin: 5px;
+	margin-top: 40px;
 	padding: 10px;
 	border: black 3px solid;
 }

@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_socketio import SocketIO
 import network.logs as log
 import os
 
@@ -9,6 +10,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 log.logger.debug(basedir)
 
 app = Flask(__name__)
+socketio = SocketIO(app)
+
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database\\app.db')
 tuser = 'sqlite:///' + os.path.join(basedir, 'database\\userdb.db')
 tnet = 'sqlite:///' + os.path.join(basedir, 'database\\network.db')

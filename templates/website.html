@@ -3,27 +3,14 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width">
-		<title> Sensor data</title>
+		<title> CVM Network</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 		<!-- Bootstrap CSS -->
     	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+    	<!-- Socketio -->
+    	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 
-		<script type="text/javascript" charset="utf-8">
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
-        socket.on('sensor_update', function(rdata){
-          var data = JSON.parse(rdata);
-          $(document.getElementById(data.nodeID+"battery")).text("Battery Level: "+data.batteryReadings[0]);
-          $(document.getElementById(data.nodeID+"lastresp")).text("Last Response: "+data.lastResponse[0]);
-          for(var i=0;i < data.sensors.length;i++){
-            var sens = data.sensors[i]
-            $(document.getElementById(data.nodeID+sens.sensorID+"val")).text(sens.sensorData[0]);
-          }//data.sensors[i].sensorID+
-        });
-
-        socket.on('new_sensor', function(data){
-          document.location.reload()
-        });
-      </script>
 		<!--{{ url_for('static', filename='main.css') }}-->
 	</head>
 	<body>

@@ -48,12 +48,12 @@ class Device(db.Model):
 		db.session.commit()
 
 	def remove(passed_device_id):
-		element = Device.query.filter_by(assigned_id=passed_id).first()
+		element = Device.query.filter_by(assigned_id=passed_device_id).first()
 		db.session.delete(element)
 		db.session.commit()
 
 	def change_title(passed_device_id, new_title):
-		element = Device.query.filter_by(assigned_id=passed_id).first()
+		element = Device.query.filter_by(assigned_id=passed_device_id).first()
 		element.title = new_title
 		db.session.commit()
 
@@ -143,6 +143,8 @@ class Sensor(db.Model):
 	sensor_type = db.Column(db.String(12), unique=False, nullable=False)
 	parse_ind = db.Column(db.String(10), unique=False, nullable=True)
 	sensor_data = db.relationship('SensorData', backref='sensor', lazy=True)
+	sensor_modifier = db.Column(db.Integer, unique=False, nullable=True)
+	sensor_modifier_sign = db.Column(db.String(6), unique=False, nullable=True)
 	events = db.relationship('SensorEvent', backref='sensor', lazy=True)
 	parent_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
 
