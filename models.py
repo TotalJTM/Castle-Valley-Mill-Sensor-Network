@@ -49,6 +49,8 @@ class Device(db.Model):
 
 	def remove(passed_device_id):
 		element = Device.query.filter_by(assigned_id=passed_device_id).first()
+		for i in element.sensors:
+			db.session.delete(i)
 		db.session.delete(element)
 		db.session.commit()
 
@@ -79,9 +81,9 @@ class Device(db.Model):
 
 	def remove_sensor(passed_id,sensor_id):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
-		for i in range(0,len(element.sensors)):
-			if element.sensors[i].assigned_id == sensor_id:
-				element.sensors.pop(i)
+		for i in element.sensors:
+			if i.assigned_id == int(sensor_id):
+				db.session.delete(i)
 		db.session.commit()
 
 	def get_sensor_data(passed_id,sensor_id,nDatapoints):

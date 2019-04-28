@@ -44,8 +44,8 @@ li
 	float: left;
 	margin: 50px;
 	padding:4px;
-	padding-left: 3%;
-	padding-right: 3%;
+	padding-left: 1%;
+	padding-right: 1%;
 	border: black 1px solid;
 	list-style-type: none;
 }

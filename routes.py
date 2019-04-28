@@ -5,7 +5,7 @@ from network.forms import LoginForm, DeviceForm, SensorForm, DeviceForm
 from network.models import User, Device, Sensor, SensorEvent
 from flask_login import login_user, current_user, logout_user, login_required
 import network.logs as log
-from network.pagecompiler import get_header_json, get_full_device_sensor_list, get_full_json
+from network.pagecompiler import get_header_json, get_full_json, get_floor_json
 import json
 from network.serversecrets import DEVICE_KEY
 
@@ -59,7 +59,7 @@ def form_new(config_option,dev_num):
         form = DeviceForm(request.form)
         if(request.method == 'POST' and form.validate_on_submit()):
             new_device = Device.create(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,mill_floor=form.entry_mill_floor.data,battery_type=form.entry_battery_type.data)
-            #return redirect(url_for('view_devices'))
+            socketio.emit('reload', True)
             return '<script>window.close()</script>'
         return render_template('deviceform.html', form=form)
 
@@ -67,8 +67,8 @@ def form_new(config_option,dev_num):
         form = SensorForm(request.form)
         if(request.method == 'POST' and form.validate_on_submit()):
             Device.new_sensor(dev_num,sensor_id=form.entry_assigned_id.data,sensor_title=form.entry_title.data,sensor_type=form.entry_sensor_type.data)
+            socketio.emit('reload', True)
             return '<script>window.close()</script>'
-            #return redirect(url_for('view_sensors'))
         return render_template('sensorform.html', form=form)
 
 @socketio.on('handle_config')
@@ -105,7 +105,7 @@ def form_event(config_option):
              return redirect(url_for('view/devices'))
              return render_template('eventform.html', form=form)
 
-"""
+
 @app.route("/config/view/device", methods=['GET'])
 def view_devices():
     j = ""
@@ -124,7 +124,7 @@ def view_sensors():
             j+=Device.get_sensor_data(i.assigned_id,q.assigned_id,4)
             j+="<br/>"
     return j
-"""
+
 
 @app.route("/server/update", methods=['POST'])
 def handle_device():
@@ -159,25 +159,25 @@ def serve_device():
 
 @app.route("/floor/first", methods=["GET"])
 def serve_floor_first():
-    data = get_full_json()
+    data = get_floor_json(1)
     data = json.loads(data)
     return render_template('website.html', data=data)
 
 @app.route("/floor/second", methods=["GET"])
 def serve_floor_second():
-    data = get_full_json()
+    data = get_floor_json(2)
     data = json.loads(data)
     return render_template('website.html', data=data)
 
 @app.route("/floor/third", methods=["GET"])
 def serve_floor_third():
-    data = get_full_json()
+    data = get_floor_json(3)
     data = json.loads(data)
     return render_template('website.html', data=data)
 
 @app.route("/floor/basement", methods=["GET"])
 def serve_floor_basement():
-    data = get_full_json()
+    data = get_floor_json(0)
     data = json.loads(data)
     return render_template('website.html', data=data)
 

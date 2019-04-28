@@ -2,4 +2,5 @@ Flask
 Flask-Login
 Flask-Script
 Flask-SQLAlchemy
+Flask-socketio
 WTForms
