@@ -113,7 +113,11 @@ class Device(db.Model):
 					if i != len(j.events)-1 and len(element.sensors) != 0:
 							event_data += ","
 				log.logger.debug(len(element.sensors))
-				generate_json = f'{{"assigned_id":"{j.assigned_id}","title":"{j.title}","sensor_type":"{j.sensor_type}","sensor_data":[{display_data}],"parse_ind":"{j.parse_ind}","sensor_modifier":{j.sensor_modifier},"sensor_modifier_sign":"{j.sensor_modifier_sign}","events":[{event_data}]}}'		
+				sensor_modifier_l = j.sensor_modifier 
+				if not sensor_modifier_l:
+					sensor_modifier_l = f'"{j.sensor_modifier}"'
+				log.logger.debug(j.sensor_modifier)
+				generate_json = f'{{"assigned_id":"{j.assigned_id}","title":"{j.title}","sensor_type":"{j.sensor_type}","sensor_data":[{display_data}],"parse_ind":"{j.parse_ind}","sensor_modifier":{sensor_modifier_l},"sensor_modifier_sign":"{j.sensor_modifier_sign}","events":[{event_data}]}}'		
 				return generate_json
 		return 'err-nosensor'
 
