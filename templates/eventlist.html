@@ -1,0 +1,52 @@
+{% extends "layout.html" -%}
+{% block content -%}
+<style>
+#customers {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#customers td, #customers th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#customers th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+}
+</style>
+<script>
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+      socket.on('reload', function(data){
+        window.location.reload(true)
+      });
+    function updateConfig(id_name, action){
+        socket.emit('handle_config', {'id':String(id_name),'action':String(action)});
+     }
+</script>
+<table id="customers" style="width:100%">
+	<tr>
+		<th>Events
+    <button type="button" class="button" style="float:right" onclick="window.open('/config/event/new/sensorevent/{{devaddr}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">
+        <span>&#x2b; New Event</span>
+    </button>
+        </th>
+	</tr>
+	{% for event in data %}
+	<tr>
+		<td rowspan='{{event.id|length}}'>{{event.id|string()}}, {{event.title}}
+			<button id="{{event.id}}" type="button" class="button" style="float:right" onclick="updateConfig('{{devaddr}}-{{event.id}}','removeevent'); return false;">
+				<span>- Remove Event</span>
+       		</button>
+      		<button id="{{event.id}}" type="button" class="button" style="float:right" onclick="window.open('/config/edit/sensor_event/{{devaddr}}-{{event.id}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">
+        		<span>Edit Event</span>
+        	</button>
+        </td>
+  	</tr>
+		
+	{% endfor %}
+</table>
+{% endblock content %}

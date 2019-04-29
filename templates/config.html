@@ -38,25 +38,38 @@
 	</tr>
 	{% for dev in data.devices %}
 	<tr>
-		<td rowspan='{{dev.sensors|length}}'>{{dev.assigned_id}}, {{dev.title}}
-			<button id="{{dev.assigned_id}}|" type="button" class="btn btn-default btn-sm" style="float:right" onclick="updateConfig(this.id,'remove');return false;">
+    {% if dev.sensors|length == 0 %}
+		  <td rowspan='1'>{{dev.assigned_id}}, {{dev.title}}
+    {% else %}
+      <td rowspan='{{dev.sensors|length}}'>{{dev.assigned_id}}, {{dev.title}}
+    {% endif %}
+			<button id="{{dev.assigned_id}}" type="button" class="btn btn-default btn-sm" style="float:right" onclick="updateConfig(this.id,'remove');return false;">
 				<span>- Remove Device</span>
         	</button>
-			<button id="{{dev.assigned_id}}|" type="button" class="btn btn-default btn-sm" style="float:right" onclick="window.open('/config/new/sensor/{{dev.assigned_id}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">
+      <button id="{{dev.assigned_id}}" type="button" class="btn btn-default btn-sm" style="float:right" onclick="window.open('/config/edit/device/{{dev.assigned_id}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">
+        <span>Edit Device</span>
+          </button>
+			<button id="{{dev.assigned_id}}" type="button" class="btn btn-default btn-sm" style="float:right" onclick="window.open('/config/new/sensor/{{dev.assigned_id}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">
 				<span>&#x2b; New Sensor</span>
         	</button>
         </td>
+    {% if dev.sensors|length == 0 %}
+      <td>  </td>
+    {% endif %}
 		{% for sens in dev.sensors %}
     	<td>{{sens.assigned_id}}, {{sens.title}}
-    		<button id="{{dev.assigned_id}}|{{sens.assigned_id}}" type="button" class="btn btn-default btn-sm" style="float:right" onclick="updateConfig(this.id,'remove'); return false;">
-				<span>- Remove Sensor</span>
-        	</button>
+    		<button id="{{dev.assigned_id}}-{{sens.assigned_id}}" type="button" class="btn btn-default btn-sm" style="float:right" onclick="updateConfig(this.id,'remove'); return false;">
+				  <span>- Remove Sensor</span>
+        </button>
+        <button id="{{dev.assigned_id}}-{{sens.assigned_id}}" type="button" class="btn btn-default btn-sm" style="float:right" onclick="window.open('/config/edit/sensor/{{dev.assigned_id}}-{{sens.assigned_id}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">
+          <span>Edit Sensor</span>
+        </button>
         	{% if sens.events|length > 0 %}
-        		<button type="button" class="btn btn-default btn-sm" style="float:right" onclick="">
+        		<button type="button" class="btn btn-default btn-sm" style="float:right" onclick="window.open('/config/view/sensorevent/{{dev.assigned_id}}-{{sens.assigned_id}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">
 					<span>View Events</span>
         		</button>
         	{% else %}
-        		<button type="button" class="btn btn-default btn-sm" style="float:right" onclick="">
+        		<button type="button" class="btn btn-default btn-sm" style="float:right" onclick="window.open('/config/event/new/sensorevent/{{dev.assigned_id}}-{{sens.assigned_id}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">
 					<span>&#x2b; Add Event</span>
         		</button>
         	{% endif %}

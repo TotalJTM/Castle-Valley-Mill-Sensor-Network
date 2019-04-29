@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, IntegerField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, IntegerField, RadioField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from network.models import Device, Sensor, SensorEvent
 
@@ -25,6 +25,9 @@ class SensorForm(FlaskForm):
 	entry_assigned_id = StringField('Sensor ID', validators=[DataRequired()])
 	entry_title = StringField('Sensor Name')
 	entry_sensor_type = StringField('Sensor Type', validators=[DataRequired()])
+	entry_parse_ind = StringField('Parse Position')
+	entry_sensor_modifier = StringField('Modifier Value')
+	entry_sensor_modifier_sign = RadioField('Modifier Operation', choices=[('add','+'),('sub','-'),('mult','X'),('div','/'),('mod','%'),('none','nothing')], default='none')
 
 	#def validate_entry_assigned_id(self, entry_assigned_id):							
 	#	val = Sensor.query.filter_by(assigned_id=entry_assigned_id.data).first()		
@@ -33,7 +36,7 @@ class SensorForm(FlaskForm):
 
 class SensorEventForm(FlaskForm):
 	entry_device_id = StringField('Device ID', validators=[DataRequired()])
-	entry_title = StringField('Sensor Name')
+	entry_title = StringField('Event Name')
 	entry_threshold_val = StringField('Threshold Value', validators=[DataRequired()])
-	entry_threshold_comparator = StringField('Threshold Comparator', validators=[DataRequired()])
-	entry_on_event = StringField('On Event Error', validators=[DataRequired()])
+	entry_threshold_comparator = RadioField('Modifier Operation', choices=[('eq','Equal To'),('gre','Greater Than'),('les','Less Than')])
+	entry_on_event = StringField('Triggers', validators=[DataRequired()])

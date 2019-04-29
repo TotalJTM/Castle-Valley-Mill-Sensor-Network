@@ -1,7 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request, session
 from flask_socketio import SocketIO
 from network import app, db, bcrypt, socketio
-from network.forms import LoginForm, DeviceForm, SensorForm, DeviceForm
+from network.forms import LoginForm, DeviceForm, SensorForm, DeviceForm, SensorEventForm
 from network.models import User, Device, Sensor, SensorEvent
 from flask_login import login_user, current_user, logout_user, login_required
 import network.logs as log
@@ -71,10 +71,96 @@ def form_new(config_option,dev_num):
             return '<script>window.close()</script>'
         return render_template('sensorform.html', form=form)
 
+@login_required
+@app.route("/config/view/sensorevent/<address>", methods=['GET', 'POST'])
+def view_events(address):
+    parse_address = address.split('-')
+    data = Device.get_sensor_data(parse_address[0],parse_address[1],0)
+    data = json.loads(data)
+    data = data["events"]
+    log.logger.debug(data)
+    return render_template('eventlist.html', data=data, devaddr=address)
+
+@login_required
+@app.route("/config/edit/<config_option>/<dev_num>", methods=['GET', 'POST'])
+def form_edit(config_option,dev_num):
+    if config_option == 'device':
+        form = DeviceForm(request.form)
+        element = Device.query.filter_by(assigned_id=dev_num).first()
+        if(request.method == 'POST'):
+            element.assigned_id = form.entry_assigned_id.data
+            element.title = form.entry_title.data
+            element.mill_floor = form.entry_mill_floor.data
+            element.battery_type = form.entry_battery_type.data
+            db.session.commit()
+            socketio.emit('reload', True)
+            return '<script>window.close()</script>'
+        form.entry_assigned_id.data = element.assigned_id
+        form.entry_title.data = element.title
+        form.entry_mill_floor.data = element.mill_floor
+        form.entry_battery_type.data = element.battery_type
+        return render_template('deviceform.html', form=form)
+
+    if config_option == 'sensor':
+        form = SensorForm(request.form)
+        dev_num_parse = dev_num.split('-')
+        element = Device.query.filter_by(assigned_id=dev_num_parse[0]).first()
+        for i in element.sensors:
+            if i.assigned_id == int(dev_num_parse[1]):
+                if(request.method == 'POST'):
+                    i.assigned_id = form.entry_assigned_id.data
+                    i.title = form.entry_title.data
+                    i.sensor_type = form.entry_sensor_type.data
+                    i.parse_ind = form.entry_parse_ind.data
+                    if form.entry_sensor_modifier.data != "":
+                        i.sensor_modifier = form.entry_sensor_modifier.data
+                    i.sensor_modifier_sign = form.entry_sensor_modifier_sign.data
+                    db.session.commit()
+                    log.logger.debug(i.title)
+                    log.logger.debug("done")
+                    socketio.emit('reload', True)
+                    return '<script>window.close()</script>'
+                else:
+                    form.entry_assigned_id.data = i.assigned_id
+                    form.entry_title.data = i.title
+                    form.entry_sensor_type.data = i.sensor_type
+                    form.entry_parse_ind.data = i.parse_ind
+                    form.entry_sensor_modifier.data = i.sensor_modifier
+                    form.entry_sensor_modifier_sign.data = i.sensor_modifier_sign
+                    return render_template('sensorform.html', form=form)
+
+    if config_option == 'sensor_event':
+        form = SensorEventForm(request.form)
+        log.logger.debug(dev_num)
+        dev_num_parse = dev_num.split('-')
+        log.logger.debug(dev_num_parse)
+        element = Device.query.filter_by(assigned_id=str(dev_num_parse[0])).first()
+        for i in element.sensors:
+            if i.assigned_id == int(dev_num_parse[1]):
+                for j in i.events:
+                    if j.id == int(dev_num_parse[2]):
+                        if(request.method == 'POST'):
+                            #j.id.data = form.entry_id.data
+                            j.title = form.entry_title.data
+                            j.threshold_val = form.entry_threshold_val.data
+                            j.threshold_comparator = form.entry_threshold_comparator.data
+                            j.on_event = form.entry_on_event.data
+                            db.session.commit()
+                            socketio.emit('reload', True)
+                            return '<script>window.close()</script>'
+                        form.entry_title.data = j.title
+                        form.entry_threshold_val.data = j.threshold_val
+                        form.entry_threshold_comparator.data = j.threshold_comparator
+                        form.entry_on_event.data = j.on_event
+                    return render_template('eventform.html', form=form)
+
+        return "no sensor"
+    return "not valid address"
+
 @socketio.on('handle_config')
 def handle_config(json_data):
     id_name = json_data['id']
-    id_name = id_name.split('|')
+    id_name = id_name.split('-')
     action = json_data['action']
     log.logger.debug(id_name)
     if action == "remove":
@@ -84,6 +170,10 @@ def handle_config(json_data):
         else:
             Device.remove(id_name[0])
             socketio.emit('reload', True)
+    if str(action) == "removeevent":
+        log.logger.debug(action)
+        Device.remove_sensor_event(id_name[0],id_name[1],id_name[2])
+        socketio.emit('reload', True)
 
 #@app.route("/config/remove/<config_option>", methods=['GET'])
 #def form_remove(config_option):
@@ -95,15 +185,20 @@ def handle_config(json_data):
 #        return render_template('deviceform2.html', form=form)
 
 @login_required
-@app.route("/config/event/<config_option>", methods=['GET', 'POST'])
-def form_event(config_option):
-    if(config_option == 'sensorevent'):
-         form = SensorEventForm(request.form)
-         if(request.method == 'POST' and form.validate_on_submit()):
-             element = Device.query.filter_by(assigned_id=form.entry_device_id).first()
-             sensor_event = Sensor(assigned_id=form.entry_device_id.data,title=form.entry_title.data,threshold_val=form.entry_threshold_val.data,threshold_comparator=form.entry_threshold_comparator.data,onevent=form.entry_on_event.data)
-             return redirect(url_for('view/devices'))
-             return render_template('eventform.html', form=form)
+@app.route("/config/event/new/<config_option>/<address>", methods=['GET', 'POST'])
+def form_event(config_option,address):
+    parse_address = address.split('-')
+    log.logger.debug(parse_address)
+    if config_option == 'sensorevent':
+        form = SensorEventForm(request.form)
+        if(request.method == 'POST'):
+            Device.new_sensor_event(passed_id=str(parse_address[0]),sensor_id=str(parse_address[1]),threshold_val=form.entry_threshold_val.data,threshold_comparator=form.entry_threshold_comparator.data,on_event=form.entry_on_event.data,title=form.entry_title.data)
+            d = Device.get_sensor_data(passed_id=str(parse_address[0]),sensor_id=str(parse_address[1]),nDatapoints=1)
+            log.logger.debug(f'data {d} {parse_address[0]} {parse_address[1]}')
+            socketio.emit('reload', True)
+            return '<script>window.close()</script>'
+        return render_template('eventform.html', form=form)
+    return "not valid address"
 
 
 @app.route("/config/view/device", methods=['GET'])

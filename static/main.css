@@ -29,23 +29,7 @@
 	margin-left: 30px;
 	margin-right: auto;
 }
-.h-button{
-	border-radius: 2px;
-	transition-duration: 0.15s;
-	background-color:#e0e0fc;
-	border: none;
-  	color: black;
-  	padding: 7px 20px;
-  	margin:2px;
-  	text-align: center;
-  	text-decoration: none;
-  	display: inline-block;
-  	font-size: 16px;
 
-}
-.h-button:hover{
-	background-color:#f7f7ff;
-}
 content:after{
 	content:"";
 }

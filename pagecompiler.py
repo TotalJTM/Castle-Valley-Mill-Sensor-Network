@@ -29,7 +29,7 @@ def get_full_json(header=True,dev_sens_event=True,bat_data=True,sens_data=True,n
 				counter = 0
 				for t in reversed(i.battery_data):
 					if counter < nDatapoints:
-						batdata += f'{{"data":"{t.data}","timestamp":"{t.timestamp}""}}'
+						batdata += f'{{"data":"{t.data}","timestamp":"{t.timestamp}"}}'
 						counter = counter+1
 						if counter != nDatapoints:
 							batdata += ","
@@ -47,7 +47,7 @@ def get_full_json(header=True,dev_sens_event=True,bat_data=True,sens_data=True,n
 					counter = 0
 					for t in reversed(j.sensor_data):
 						if counter < nDatapoints:
-							sensdata += f'{{"data":"{t.data}","timestamp":"{t.timestamp}""}}'
+							sensdata += f'{{"data":"{t.data}","timestamp":"{t.timestamp}"}}'
 							counter = counter+1
 							if counter != nDatapoints:
 								sensdata += ","
@@ -55,7 +55,7 @@ def get_full_json(header=True,dev_sens_event=True,bat_data=True,sens_data=True,n
 				sens_count = sens_count + 1
 				if sens_count != len(i.sensors):
 					sensors += ","
-			data += f'{{"assigned_id":"{i.assigned_id}","title":"{i.title}","mill_floor":{i.mill_floor},"battery_type":{i.battery_type},"battery_data":{batdata}],"sensors":{sensors}]}}'
+			data += f'{{"assigned_id":"{i.assigned_id}","title":"{i.title}","mill_floor":"{i.mill_floor}","battery_type":{i.battery_type},"battery_data":{batdata}],"sensors":{sensors}]}}'
 			dev_count = dev_count + 1
 			if dev_count != len(full_dev_list):
 				data += ","
@@ -76,7 +76,7 @@ def get_floor_json(floor,nDatapoints=1):
 		counter = 0
 		for t in reversed(i.battery_data):
 			if counter < nDatapoints:
-				batdata += f'{{"data":"{t.data}","timestamp":"{t.timestamp}""}}'
+				batdata += f'{{"data":"{t.data}","timestamp":"{t.timestamp}"}}'
 				counter = counter+1
 				if counter != nDatapoints:
 					batdata += ","
@@ -94,7 +94,7 @@ def get_floor_json(floor,nDatapoints=1):
 			counter = 0
 			for t in reversed(j.sensor_data):
 				if counter < nDatapoints:
-					sensdata += f'{{"data":"{t.data}","timestamp":"{t.timestamp}""}}'
+					sensdata += f'{{"data":"{t.data}","timestamp":"{t.timestamp}"}}'
 					counter = counter+1
 					if counter != nDatapoints:
 						sensdata += ","
@@ -102,7 +102,7 @@ def get_floor_json(floor,nDatapoints=1):
 			sens_count = sens_count + 1
 			if sens_count != len(i.sensors):
 				sensors += ","
-		data += f'{{"assigned_id":"{i.assigned_id}","title":"{i.title}","mill_floor":{i.mill_floor},"battery_type":{i.battery_type},"battery_data":{batdata}],"sensors":{sensors}]}}'
+		data += f'{{"assigned_id":"{i.assigned_id}","title":"{i.title}","mill_floor":"{i.mill_floor}","battery_type":{i.battery_type},"battery_data":{batdata}],"sensors":{sensors}]}}'
 		dev_count = dev_count + 1
 		if dev_count != len(full_dev_list):
 			data += ","

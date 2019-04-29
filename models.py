@@ -61,13 +61,20 @@ class Device(db.Model):
 
 	def get_data(passed_id,nDatapoints=5):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
-		display_data = []
+		display_data = ""
 		counter = 0
 		for i in reversed(element.battery_data):
 			if counter < nDatapoints:
-				display_data.append(f'{{"data":{i.data},"timestamp":{i.timestamp}}}')
+				display_data +=(f'{{"data":{i.data},"timestamp":{i.timestamp}}}')
+				if counter != nDatapoints-1:
+							display_data += ","
 				counter = counter+1
-		generate_json = f'{{"assigned_id":{element.assigned_id},"title":{element.title},"mill_floor":{element.mill_floor},"battery_type":{element.battery_type},"battery_data":{display_data},"sensors":{element.sensors}}}'
+		sensor_data = ""
+		for i in range(0,len(element.sensors)):
+					sensor_data += f'{{"title":"{element.sensors[i].title}","assigned_id":{element.sensors[i].assigned_id}}}'
+					if i != len(element.sensors)-1:
+							sensor_data += ","
+		generate_json = f'{{"assigned_id":{element.assigned_id},"title":"{element.title}","mill_floor":{element.mill_floor},"battery_type":{element.battery_type},"battery_data":[{display_data}],"sensors":[{sensor_data}]}}'
 		return generate_json
 
 	def new_sensor(passed_id,sensor_id,sensor_type,sensor_title=None):
@@ -83,28 +90,56 @@ class Device(db.Model):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		for i in element.sensors:
 			if i.assigned_id == int(sensor_id):
+				for j in i.events:
+					db.session.delete(j)
 				db.session.delete(i)
 		db.session.commit()
 
 	def get_sensor_data(passed_id,sensor_id,nDatapoints):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		for j in element.sensors:
-			if j.assigned_id == sensor_id:
-				display_data = []
+			if j.assigned_id == int(sensor_id):
+				display_data = ""
+				event_data = ""
 				counter = 0
 				for i in reversed(j.sensor_data):
-					if counter < nDatapoints:
-						display_data.append(f'{{"data":{i.data},"timestamp":{i.timestamp}}}')
+					if counter < nDatapoints and len(j.sensor_data) != 0:
+						display_data += (f'{{"data":{i.data},"timestamp":{i.timestamp}}}')
+						if counter != nDatapoints-1:
+							display_data += ","
 						counter = counter+1
-				generate_json = f'{{"assigned_id":{j.assigned_id},"title":{j.title},"sensor_type":{j.sensor_type},"sensor_data":{display_data}}}'		
+				for i in range(0,len(j.events)):
+					event_data += f'{{"id":"{j.events[i].id}","title":"{j.events[i].title}","threshold_val":"{j.events[i].threshold_val}","threshold_comparator":"{j.events[i].threshold_comparator}","on_event":"{j.events[i].on_event}"}}'
+					if i != len(j.events)-1 and len(element.sensors) != 0:
+							event_data += ","
+				log.logger.debug(len(element.sensors))
+				generate_json = f'{{"assigned_id":"{j.assigned_id}","title":"{j.title}","sensor_type":"{j.sensor_type}","sensor_data":[{display_data}],"parse_ind":"{j.parse_ind}","sensor_modifier":{j.sensor_modifier},"sensor_modifier_sign":"{j.sensor_modifier_sign}","events":[{event_data}]}}'		
 				return generate_json
 		return 'err-nosensor'
 
+	def modify_sensor_data(data, sensor):
+		if sensor.sensor_modifier_sign == "none":
+			return data
+		elif sensor.sensor_modifier_sign == "sub":
+			return data-sensor.sensor_modifier
+		elif sensor.sensor_modifier_sign == "add":
+			return data+sensor.sensor_modifier
+		elif sensor.sensor_modifier_sign == "mult":
+			return data*sensor.sensor_modifier
+		elif sensor.sensor_modifier_sign == "div":
+			return data/sensor.sensor_modifier
+		elif sensor.sensor_modifier_sign == "mod":
+			return data%sensor.sensor_modifier
+		else:
+			return data
+
 	def new_sensor_data(passed_id,sensor_id,new_data):
-		data_entry = SensorData(data=new_data)
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		for j in element.sensors:
 			if j.assigned_id == sensor_id:
+				data = Device.modify_sensor_data(new_data,j)
+				log.logger.debug(data)
+				data_entry = SensorData(data=data)
 				j.sensor_data.append(data_entry)
 		db.session.commit()
 
@@ -115,19 +150,23 @@ class Device(db.Model):
 		db.session.commit()
 
 	def new_sensor_event(passed_id,sensor_id,threshold_val,threshold_comparator,on_event,title=""):
-		element = Device.query.filter_by(assigned_id=passed_id).first()
+		element = Device.query.filter_by(assigned_id=str(passed_id)).first()
 		for i in element.sensors:
-			if i.assigned_id == sensor_id:
-				i.events.append(SensorEvent(threshold_val=threshold_val,threshold_comparator=threshold_comparator,on_event=on_event,title=title))
+			log.logger.debug(f"i.assigned_id")
+			if i.assigned_id == int(sensor_id):
+				event = SensorEvent(threshold_val=threshold_val,threshold_comparator=threshold_comparator,on_event=on_event,title=title)
+				i.events.append(event)
 		db.session.commit()
 
 	def remove_sensor_event(passed_id,sensor_id,database_event_id):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		for i in element.sensors:
-			if i.assigned_id == sensor_id:
-				for j in range(0,len(i.events)):
-					if i.events[j].id == database_event_id:
-						i.events.pop(j)
+			if i.assigned_id == int(sensor_id):
+				for j in i.events:
+					log.logger.debug(f"{j.id} {database_event_id}")
+					if j.id == int(database_event_id):
+						log.logger.debug("killed event")
+						db.session.delete(j)
 		db.session.commit()
 
 class BatteryData(db.Model):
@@ -145,7 +184,7 @@ class Sensor(db.Model):
 	sensor_type = db.Column(db.String(12), unique=False, nullable=False)
 	parse_ind = db.Column(db.String(10), unique=False, nullable=True)
 	sensor_data = db.relationship('SensorData', backref='sensor', lazy=True)
-	sensor_modifier = db.Column(db.Integer, unique=False, nullable=True)
+	sensor_modifier = db.Column(db.Float, unique=False, nullable=True)
 	sensor_modifier_sign = db.Column(db.String(6), unique=False, nullable=True)
 	events = db.relationship('SensorEvent', backref='sensor', lazy=True)
 	parent_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
