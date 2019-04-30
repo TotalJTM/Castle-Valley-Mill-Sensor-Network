@@ -1,0 +1,1 @@
+{'user': {'user_current': 'TotalJTM', 'user_permission': 'super'}, 'header': {'masthead_time': 'Apr 29, 04:14'}, 'blocks': [], 'groups': [{'title': '1st Floor Devices Battery Level', 'elements': [{'title': 'Valve Board', 'id': '111115', 'data': '4.462854'}]}]}

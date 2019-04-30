@@ -1,0 +1,24 @@
+{% extends "website.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='floorcss.css') }}">
+
+<div class="flex-container-main">
+	{% for group in data["groups"] %}
+		<div class="flex-container-item-group">
+		<h3><u>{{group["title"]}}</u></h3>
+		<table>
+		<tr>
+	  		<th>Device</th>
+	  		<th>Data</th>
+	  	</tr>
+	  	{% for group_element in group["elements"] %}
+	  	<tr id="row|{{group['sensor_type']}}|{{group_element['id']}}">
+	  		<td>{{group_element["title"]}} [{{group_element["id"]}}]</td>
+	  		<td id="data|{{group['sensor_type']}}|{{group_element['id']}}">{{group_element["data"]}}</td>
+	  	</tr>
+	  	{% endfor %}
+	  	</table>
+	 	</div>
+	{% endfor %}
+</div>
+{% endblock %}

@@ -254,27 +254,31 @@ def serve_device():
 
 @app.route("/floor/first", methods=["GET"])
 def serve_floor_first():
-    data = get_floor_json(1)
-    data = json.loads(data)
-    return render_template('website.html', data=data)
+    blocks_and_groups = '{"block":[{"title":"valve1","id":"111115|1"}],"group":[{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"}]}' #{"title":"","id":""} {"table_title":"","sensor_type":""}
+    data = compile_into_BandG(1,blocks_and_groups)
+    log.logger.debug(data)
+    return render_template('floorblank.html', data=data)
 
 @app.route("/floor/second", methods=["GET"])
 def serve_floor_second():
-    data = get_floor_json(2)
-    data = json.loads(data)
-    return render_template('website.html', data=data)
+    blocks_and_groups = '{"block":[{"title":"valve1","id":"111115|1"}],"group":[{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"}]}' #{"title":"","id":""} {"table_title":"","sensor_type":""}
+    data = compile_into_BandG(2,blocks_and_groups)
+    log.logger.debug(data)
+    return render_template('floorblank.html', data=data)
 
 @app.route("/floor/third", methods=["GET"])
 def serve_floor_third():
-    data = get_floor_json(3)
-    data = json.loads(data)
-    return render_template('website.html', data=data)
+    blocks_and_groups = '{"block":[{"title":"valve1","id":"111115|1"}],"group":[{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"}]}' #{"title":"","id":""} {"table_title":"","sensor_type":""}
+    data = compile_into_BandG(3,blocks_and_groups)
+    log.logger.debug(data)
+    return render_template('floorblank.html', data=data)
 
 @app.route("/floor/basement", methods=["GET"])
 def serve_floor_basement():
-    data = get_floor_json(0)
-    data = json.loads(data)
-    return render_template('website.html', data=data)
+    blocks_and_groups = '{"block":[{"title":"valve1","id":"111115|1"}],"group":[{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"}]}' #{"title":"","id":""} {"table_title":"","sensor_type":""}
+    data = compile_into_BandG(0,blocks_and_groups)
+    log.logger.debug(data)
+    return render_template('floorblank.html', data=data)
 
 @login_required
 @app.route("/config", methods=["GET"])
@@ -285,3 +289,67 @@ def serve_config():
         return render_template('config.html', data=data)
     else:
         return "You do not have correct permissions for this section"
+
+def compile_into_BandG(floor_num, blocks_and_groups_input):
+    floor_data = get_floor_json(floor_num)
+    floor_data = json.loads(floor_data)
+    blocks_and_groups = blocks_and_groups_input
+    b_and_g = json.loads(blocks_and_groups)
+
+    data = "{"
+    data += get_header_json()
+    data += ',"blocks":['
+
+    for i in b_and_g["block"]:
+        d_data = ""
+        d_state = 0
+        count = 0
+        addr = i["id"].split('|')
+        for j in floor_data["devices"]:
+            if j["assigned_id"] == addr[0]:
+                for sens in j["sensors"]:
+                    if j["assigned_id"] == int(addr[1]):
+                        latest_data = sens["sensor_data"][0]
+                        data += f'{{"title":"{i["title"]}","id":"{i["id"]}","data":"{latest_data["data"]}"}}'
+                        count = count + 1
+                        if count != len(b_and_g["block"]):
+                            data += ","
+
+    data += '],"groups":['
+    count = 0
+    for i in b_and_g["group"]:
+        d_data = ""
+        d_state = 0
+        group_element = ""
+        stype = i["sensor_type"].split('|')
+        if len(stype) > 1:
+            if stype[0] == "dev":
+                if stype[1] != "battery_level":
+                    for j in floor_data["devices"]:
+                        data_field = j[f'{stype[1]}']
+                        if data_field is not None:
+                            group_element += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{data_field}","status":""}},'
+                else:
+                    for j in floor_data["devices"]:
+                        try:
+                            group_element += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{j["battery_data"][0]["data"]}","status":""}},'
+                        except:
+                            pass
+        else:
+            for j in floor_data["devices"]:
+                for sens in j["sensors"]:
+                    if j["sensor_type"] == i["sensor_type"]:
+                        latest_data = sens["sensor_data"][0]
+                        data += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{latest_data["data"]}","status":""}},'
+        if group_element != "":
+            group_element = group_element[:-1]
+        data += f'{{"title":"{i["table_title"]}","elements":[{group_element}]}}'
+        count = count+1
+        log.logger.debug(f'{count}, {len(b_and_g["group"])}')
+        if count != len(b_and_g["group"]):
+            data += ","
+
+    data += ']}'
+
+    data = json.loads(data)
+    return data
