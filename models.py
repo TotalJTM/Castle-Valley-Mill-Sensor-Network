@@ -92,6 +92,8 @@ class Device(db.Model):
 			if i.assigned_id == int(sensor_id):
 				for j in i.events:
 					db.session.delete(j)
+				for j in i.sensor_data:
+					db.session.delete(j)
 				db.session.delete(i)
 		db.session.commit()
 
@@ -141,6 +143,7 @@ class Device(db.Model):
 		element = Device.query.filter_by(assigned_id=passed_id).first()
 		for j in element.sensors:
 			if j.assigned_id == sensor_id:
+				new_data = new_data.strip('\n')
 				data = Device.modify_sensor_data(new_data,j)
 				log.logger.debug(data)
 				data_entry = SensorData(data=data)

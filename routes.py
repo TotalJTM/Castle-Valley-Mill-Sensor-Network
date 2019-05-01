@@ -254,7 +254,7 @@ def serve_device():
 
 @app.route("/floor/first", methods=["GET"])
 def serve_floor_first():
-    blocks_and_groups = '{"block":[{"title":"valve1","id":"111115|1"}],"group":[{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"}]}' #{"title":"","id":""} {"table_title":"","sensor_type":""}
+    blocks_and_groups = '{"block":[{"title":"valve1","id":"111115|1"}],"group":[{"table_title":"1st Floor Line Shaft RPM","sensor_type":"shaft_rpm"},{"table_title":"1st Floor Bearing Temps","sensor_type":"valve"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"}]}' #{"title":"","id":""} {"table_title":"","sensor_type":""}
     data = compile_into_BandG(1,blocks_and_groups)
     log.logger.debug(data)
     return render_template('floorblank.html', data=data)
