@@ -4,6 +4,8 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 import network.logs as log
+import time
+from threading import Thread, active_count
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -42,5 +44,17 @@ log.logger.debug(User.query.all())
 #import network.configuration as conf
 #nodeList = conf.get_node_config(nodeList)
 
+global active_alerts
+active_alerts = []
+
 from network import routes
 #users.init()
+
+def update_client():
+	while active_count() > 0:
+		routes.update_header(active_alerts)
+		time.sleep(10)
+
+content_delivery = Thread(target=update_client)
+content_delivery.daemon = True
+content_delivery.start()

@@ -77,7 +77,7 @@ class Device(db.Model):
 		generate_json = f'{{"assigned_id":{element.assigned_id},"title":"{element.title}","mill_floor":{element.mill_floor},"battery_type":{element.battery_type},"battery_data":[{display_data}],"sensors":[{sensor_data}]}}'
 		return generate_json
 
-	def new_sensor(passed_id,sensor_id,sensor_type,sensor_title=None):
+	def new_sensor(passed_id,sensor_id,sensor_type,sensor_title=None,sensor_modifier_sign="none"):
 		element = Device.query.filter_by(assigned_id=str(passed_id)).first()
 		if element:
 			new_sensor = Sensor(assigned_id=str(sensor_id),title=sensor_title,sensor_type=str(sensor_type))
@@ -106,7 +106,7 @@ class Device(db.Model):
 				counter = 0
 				for i in reversed(j.sensor_data):
 					if counter < nDatapoints and len(j.sensor_data) != 0:
-						display_data += (f'{{"data":{i.data},"timestamp":{i.timestamp}}}')
+						display_data += (f'{{"data":"{i.data}","timestamp":{i.timestamp}}}')
 						if counter != nDatapoints-1:
 							display_data += ","
 						counter = counter+1
@@ -144,6 +144,7 @@ class Device(db.Model):
 		for j in element.sensors:
 			if j.assigned_id == sensor_id:
 				new_data = new_data.strip('\n')
+				new_data = new_data.strip('\r')
 				data = Device.modify_sensor_data(new_data,j)
 				log.logger.debug(data)
 				data_entry = SensorData(data=data)

@@ -7,16 +7,41 @@
 		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 		<!-- Bootstrap CSS -->
     	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
-    	<!-- Socketio -->
-    	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
-    	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    	<!-- Socketio JS-->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+        <!-- Jquery JS -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <!-- Bootstrap JS -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-		<!--{{ url_for('static', filename='main.css') }}-->
+		<!--{{ url_for('static', filename='main.css') }}   updateheader -->
+		<script type="text/javascript" charset="utf-8" onload=>
+			$(document).ready(function(){
+				alert("h")
+	    		var socket = io.connect('http://' + document.domain + ':' + location.port + "/floor");
+	      		socket.on('reload', function(data){
+	        		window.location.reload(true)
+	        	});
+	        	socket.on('updateheader', function(data){
+	        		var t = data;
+	        		alert("h")
+	        		$(document.getElementById("masthead_time")).text(t.time);
+	        	});
+	        	socket.on('updatepage', function(data){
+	        		var i;
+	        		var t = JSON.parse(data)
+					for (i = 0; i < t.newdata.length; i++) { 
+						var j = t.newdata[i];
+	  					document.getElementById(j.id).textContent = j.data;
+					}
+	      		});
+	        });
+		</script>
 	</head>
 	<body>
 		<header>
 			<div class="header-element">
-					<span id="masthead_time" style="float:left;">{{data.header.masthead_time}}</span>
+					<span style="float:left;"><p  id="masthead_time" style="color:white">{{data.header.masthead_time}}</p></span>
 					{% if data.user.user_current %}
 			 			<span id="masthead_usertitle" style="float:right;">Hello {{data.user.user_current}} <a class="nav-link" href="{{url_for('logout')}}"> Logout</a></span>
 			 		{%endif%}

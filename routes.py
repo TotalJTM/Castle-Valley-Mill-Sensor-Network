@@ -6,6 +6,7 @@ from network.models import User, Device, Sensor, SensorEvent
 from flask_login import login_user, current_user, logout_user, login_required
 import network.logs as log
 from network.pagecompiler import get_header_json, get_full_json, get_floor_json
+from datetime import datetime
 import json
 from network.serversecrets import DEVICE_KEY
 
@@ -235,6 +236,7 @@ def handle_device():
             for sensor in message["sensors"]:
                 Device.new_sensor(passed_id=message["id"],sensor_id=sensor["id"],sensor_type=sensor["type"])
                 Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
+                update_site_data(message["id"],sensor["id"])
         else:
             Device.new_battery_data(passed_id=message["id"],new_data=message["battery_level"])
             for sensor in message["sensors"]:
@@ -247,6 +249,27 @@ def handle_device():
                     Device.new_sensor(passed_id=message["id"],sensor_id=sensor["id"],sensor_type=sensor["type"])
                     Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
     return 'done'
+
+def update_site_data(dev_num):
+    message = ""
+    counter = 0
+    element = Device.query.filter_by(assigned_id=dev_num).first()
+    for sensor in element.sensors:
+        message += f'{{"id":"data|{dev_num}|{sensor.assigned_id}", "data":"{sensor.data[0].data}"}}'
+        if counter != len(sensor):
+            message += ','
+    socketio.emit('updatepage', f'"newdata":[{message}]')
+
+def update_header(alerts):
+    alert_list = ""
+    counter = 0
+    for alert in alerts:
+        alert_list += f'{alert}'
+        counter = counter + 1
+        if counter != len(alert):
+            alert_list += ','
+    time = datetime.now().strftime("%b %d, %I:%M:%S")
+    socketio.emit('updateheader', f'{{"time":"{time}", "alerts":"[{alert_list}]"}}', broadcast=True, namespace="/floor")
 
 @app.route("/server/retrieve", methods=['POST'])
 def serve_device():
@@ -318,6 +341,7 @@ def compile_into_BandG(floor_num, blocks_and_groups_input):
     data += '],"groups":['
     count = 0
     for i in b_and_g["group"]:
+        log.logger.debug(i)
         d_data = ""
         d_state = 0
         group_element = ""
@@ -338,11 +362,12 @@ def compile_into_BandG(floor_num, blocks_and_groups_input):
         else:
             for j in floor_data["devices"]:
                 for sens in j["sensors"]:
-                    if j["sensor_type"] == i["sensor_type"]:
+                    if sens["sensor_type"] == i["sensor_type"]:
                         latest_data = sens["sensor_data"][0]
-                        data += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{latest_data["data"]}","status":""}},'
+                        group_element += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{latest_data["data"]}","status":""}},'
         if group_element != "":
             group_element = group_element[:-1]
+        log.logger.debug(group_element)
         data += f'{{"title":"{i["table_title"]}","elements":[{group_element}]}}'
         count = count+1
         log.logger.debug(f'{count}, {len(b_and_g["group"])}')
