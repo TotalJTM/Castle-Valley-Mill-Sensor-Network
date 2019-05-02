@@ -8,7 +8,7 @@ from datetime import datetime
 import json
 
 def get_header_json():
-	time = datetime.now().strftime("%b %d, %I:%M")
+	time = datetime.now().strftime("%b %d, %I:%M:%S")
 	data = f'"user":{{"user_current":"{current_user.username}","user_permission":"{current_user.perms}"}},"header":{{"masthead_time":"{time}"}}'
 	return data
 

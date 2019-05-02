@@ -258,7 +258,7 @@ def update_site_data(dev_num):
         message += f'{{"id":"data|{dev_num}|{sensor.assigned_id}", "data":"{sensor.data[0].data}"}}'
         if counter != len(sensor):
             message += ','
-    socketio.emit('updatepage', f'"newdata":[{message}]')
+    socketio.emit('updatepage', {'newdata':[f'{message}']})
 
 def update_header(alerts):
     alert_list = ""
@@ -269,7 +269,7 @@ def update_header(alerts):
         if counter != len(alert):
             alert_list += ','
     time = datetime.now().strftime("%b %d, %I:%M:%S")
-    socketio.emit('updateheader', f'{{"time":"{time}", "alerts":"[{alert_list}]"}}', broadcast=True, namespace="/floor")
+    socketio.emit('updateheader', {'time':f'{time}', 'alerts':[f'{alert_list}']}, broadcast=True, namespace="/floor")
 
 @app.route("/server/retrieve", methods=['POST'])
 def serve_device():
@@ -277,7 +277,7 @@ def serve_device():
 
 @app.route("/floor/first", methods=["GET"])
 def serve_floor_first():
-    blocks_and_groups = '{"block":[{"title":"valve1","id":"111115|1"}],"group":[{"table_title":"1st Floor Line Shaft RPM","sensor_type":"shaft_rpm"},{"table_title":"1st Floor Bearing Temps","sensor_type":"valve"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"}]}' #{"title":"","id":""} {"table_title":"","sensor_type":""}
+    blocks_and_groups = '{"block":[{"title":"valve1","id":"111115|1"}],"group":[{"table_title":"1st Floor Line Shaft RPM","sensor_type":"shaft_rpm"},{"table_title":"1st Floor Bearing Temps","sensor_type":"valve"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Last Online","sensor_type":"dev|last_online"}]}' #{"title":"","id":""} {"table_title":"","sensor_type":""}
     data = compile_into_BandG(1,blocks_and_groups)
     log.logger.debug(data)
     return render_template('floorblank.html', data=data)
@@ -348,17 +348,24 @@ def compile_into_BandG(floor_num, blocks_and_groups_input):
         stype = i["sensor_type"].split('|')
         if len(stype) > 1:
             if stype[0] == "dev":
-                if stype[1] != "battery_level":
-                    for j in floor_data["devices"]:
-                        data_field = j[f'{stype[1]}']
-                        if data_field is not None:
-                            group_element += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{data_field}","status":""}},'
-                else:
+                if stype[1] == "battery_level":
                     for j in floor_data["devices"]:
                         try:
                             group_element += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{j["battery_data"][0]["data"]}","status":""}},'
                         except:
                             pass
+                elif stype[1] == "last_online":
+                    for j in floor_data["devices"]:
+                        try:
+                            group_element += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{j["battery_data"][0]["timestamp"]}","status":""}},'
+                        except:
+                            pass
+                else:
+                    for j in floor_data["devices"]:
+                        data_field = j[f'{stype[1]}']
+                        if data_field is not None:
+                            group_element += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{data_field}","status":""}},'
+                    
         else:
             for j in floor_data["devices"]:
                 for sens in j["sensors"]:

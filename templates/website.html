@@ -17,15 +17,17 @@
 		<!--{{ url_for('static', filename='main.css') }}   updateheader -->
 		<script type="text/javascript" charset="utf-8" onload=>
 			$(document).ready(function(){
-				alert("h")
+				//alert("h")
 	    		var socket = io.connect('http://' + document.domain + ':' + location.port + "/floor");
 	      		socket.on('reload', function(data){
 	        		window.location.reload(true)
 	        	});
-	        	socket.on('updateheader', function(data){
-	        		var t = data;
-	        		alert("h")
-	        		$(document.getElementById("masthead_time")).text(t.time);
+	        	socket.on("updateheader", function(data){
+	        		//alert(data);
+	        		//var t = JSON.parse(data);
+	        		var timetext = document.getElementById("masthead_time");
+	        		//alert(data.time);
+	        		timetext.innerHTML = data['time'];
 	        	});
 	        	socket.on('updatepage', function(data){
 	        		var i;
