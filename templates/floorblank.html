@@ -12,9 +12,19 @@
 	  		<th>Data</th>
 	  	</tr>
 	  	{% for group_element in group["elements"] %}
-	  	<tr id="row|{{group['sensor_type']}}|{{group_element['id']}}">
-	  		<td>{{group_element["title"]}} [{{group_element["id"]}}]</td>
-	  		<td id="data|{{group['sensor_type']}}|{{group_element['id']}}">{{group_element["data"]}}</td>
+	  		{% if group_element["type"] == "battery" %}
+	  			<tr id="row|battery|{{group_element['id']}}">
+	  			<td>{{group_element["title"]}} [{{group_element["id"]}}]</td>
+	  			<td id="data|battery|{{group_element['id']}}">{{group_element["data"]}}</td>
+	  		{% elif group_element["type"] == "timestamp" %}
+	  			<tr id="row|timestamp|{{group_element['id']}}">
+	  			<td>{{group_element["title"]}} [{{group_element["id"]}}]</td>
+	  			<td id="data|timestamp|{{group_element['id']}}">{{group_element["data"]}}</td>
+	  		{% else %}
+	  			<tr id="row|{{group['sensor_type']}}|{{group_element['id']}}">
+	  			<td>{{group_element["title"]}} [{{group_element["id"]}}]</td>
+	  			<td id="data|{{group['sensor_type']}}|{{group_element['id']}}">{{group_element["data"]}}</td>
+	  		{% endif %}
 	  	</tr>
 	  	{% endfor %}
 	  	</table>

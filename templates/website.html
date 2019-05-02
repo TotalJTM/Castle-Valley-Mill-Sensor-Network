@@ -4,7 +4,7 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width">
 		<title> CVM Network</title>
-		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 		<!-- Bootstrap CSS -->
     	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
     	<!-- Socketio JS-->
@@ -12,32 +12,32 @@
         <!-- Jquery JS -->
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <!-- Bootstrap JS -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>-->
+        <!--<script src="{{ url_for('static', filename='socketio.dev.js') }}"></script>-->
+        <!--<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>-->
+        <!--<script src="{{ url_for('static', filename='jquery.min.js') }}"></script>-->
 
 		<!--{{ url_for('static', filename='main.css') }}   updateheader -->
 		<script type="text/javascript" charset="utf-8" onload=>
+
 			$(document).ready(function(){
-				//alert("h")
+				alert("h")
 	    		var socket = io.connect('http://' + document.domain + ':' + location.port + "/floor");
 	      		socket.on('reload', function(data){
 	        		window.location.reload(true)
 	        	});
 	        	socket.on("updateheader", function(data){
-	        		//alert(data);
-	        		//var t = JSON.parse(data);
+	        		alert(data);
 	        		var timetext = document.getElementById("masthead_time");
-	        		//alert(data.time);
 	        		timetext.innerHTML = data['time'];
 	        	});
 	        	socket.on('updatepage', function(data){
-	        		var i;
-	        		var t = JSON.parse(data)
-					for (i = 0; i < t.newdata.length; i++) { 
-						var j = t.newdata[i];
-	  					document.getElementById(j.id).textContent = j.data;
-					}
+	        		
 	      		});
 	        });
+	        //setTimeout(function() {
+    		//	location.reload();
+			//}, 3000);
 		</script>
 	</head>
 	<body>

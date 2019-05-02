@@ -234,31 +234,50 @@ def handle_device():
             Device.create(assigned_id=message["id"],battery_type=message["battery_type"])
             Device.new_battery_data(passed_id=message["id"],new_data=message["battery_level"])
             for sensor in message["sensors"]:
-                Device.new_sensor(passed_id=message["id"],sensor_id=sensor["id"],sensor_type=sensor["type"])
-                Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
-                update_site_data(message["id"],sensor["id"])
+                ndata = sensor["data"].split('|')
+                if len(ndata) > 1:
+                    Device.new_sensor(passed_id=message["id"],sensor_id=sensor["id"],sensor_type=sensor["type"])
+                    Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=ndata[1])
+                    update_site_data(message["id"])
+                else:
+                    Device.new_sensor(passed_id=message["id"],sensor_id=sensor["id"],sensor_type=sensor["type"])
+                    Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
+                    update_site_data(message["id"])
         else:
             Device.new_battery_data(passed_id=message["id"],new_data=message["battery_level"])
             for sensor in message["sensors"]:
                 check_sensor = False
+                ndata = sensor["data"].split('|')
                 for j in Device.query.filter_by(assigned_id=message["id"]).first().sensors:
                     if j.assigned_id == sensor["id"]:
-                        Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
-                        check_sensor = True
+                        if len(ndata) > 1:
+                            Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=ndata[1])
+                            check_sensor = True
+                            update_site_data(message["id"])
+                        else:
+                            Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
+                            check_sensor = True
+                            update_site_data(message["id"])
                 if not check_sensor:
                     Device.new_sensor(passed_id=message["id"],sensor_id=sensor["id"],sensor_type=sensor["type"])
-                    Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
+                    if len(ndata) > 1:
+                        Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=ndata[1])
+                    else:
+                        Device.new_sensor_data(passed_id=message["id"],sensor_id=sensor["id"],new_data=sensor["data"])
+
     return 'done'
 
 def update_site_data(dev_num):
-    message = ""
+    message = {'newdata':[]}
     counter = 0
     element = Device.query.filter_by(assigned_id=dev_num).first()
+    message['newdata'].append({'id':f'data|battery|{dev_num}', 'type':'battery', 'data':f'{element.battery_data[-1].data}'})
+    message['newdata'].append({'id':f'data|timestamp|{dev_num}', 'type':'timestamp', 'data':f'{element.battery_data[-1].timestamp}'})
     for sensor in element.sensors:
-        message += f'{{"id":"data|{dev_num}|{sensor.assigned_id}", "data":"{sensor.data[0].data}"}}'
-        if counter != len(sensor):
-            message += ','
-    socketio.emit('updatepage', {'newdata':[f'{message}']})
+        message['newdata'].append({"id":f'data|{dev_num}|{sensor.assigned_id}', "type":"data", "data":f'{sensor.sensor_data[-1].data}'})
+            #if counter != len(sensor):
+            #    message += ','
+    socketio.emit('updatepage', message)
 
 def update_header(alerts):
     alert_list = ""
@@ -277,7 +296,7 @@ def serve_device():
 
 @app.route("/floor/first", methods=["GET"])
 def serve_floor_first():
-    blocks_and_groups = '{"block":[{"title":"valve1","id":"111115|1"}],"group":[{"table_title":"1st Floor Line Shaft RPM","sensor_type":"shaft_rpm"},{"table_title":"1st Floor Bearing Temps","sensor_type":"valve"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Last Online","sensor_type":"dev|last_online"}]}' #{"title":"","id":""} {"table_title":"","sensor_type":""}
+    blocks_and_groups = '{"block":[{"title":"valve1","id":"111115|1"}],"group":[{"table_title":"1st Floor Bearing Temperatures","sensor_type":"bearing_temp"},{"table_title":"1st Floor Line Shaft RPM","sensor_type":"shaft_rpm"},{"table_title":"1st Floor Valves","sensor_type":"valve"},{"table_title":"1st Floor Devices Battery Level","sensor_type":"dev|battery_level"},{"table_title":"1st Floor Devices Last Online","sensor_type":"dev|last_online"}]}' #{"title":"","id":""} {"table_title":"","sensor_type":""}
     data = compile_into_BandG(1,blocks_and_groups)
     log.logger.debug(data)
     return render_template('floorblank.html', data=data)
@@ -364,7 +383,7 @@ def compile_into_BandG(floor_num, blocks_and_groups_input):
                     for j in floor_data["devices"]:
                         data_field = j[f'{stype[1]}']
                         if data_field is not None:
-                            group_element += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{data_field}","status":""}},'
+                            group_element += f'{{"title":"{j["title"]}","id":"bat|{j["assigned_id"]}","data":"{data_field}","status":""}},'
                     
         else:
             for j in floor_data["devices"]:
@@ -375,7 +394,13 @@ def compile_into_BandG(floor_num, blocks_and_groups_input):
         if group_element != "":
             group_element = group_element[:-1]
         log.logger.debug(group_element)
-        data += f'{{"title":"{i["table_title"]}","elements":[{group_element}]}}'
+        if len(stype) > 1:
+            data += f'{{"title":"{i["table_title"]}","sensor_type":"{stype[1]}", "elements":[{group_element}]}}'
+        else:
+            log.logger.debug(stype)
+            js = ""
+            js = js.join(stype)
+            data += f'{{"title":"{i["table_title"]}","sensor_type":"{js}", "elements":[{group_element}]}}'
         count = count+1
         log.logger.debug(f'{count}, {len(b_and_g["group"])}')
         if count != len(b_and_g["group"]):
