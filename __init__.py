@@ -53,7 +53,7 @@ from network import routes
 def update_client():
 	while active_count() > 0:
 		routes.update_header(active_alerts)
-		time.sleep(3)
+		time.sleep(7)
 
 content_delivery = Thread(target=update_client)
 content_delivery.daemon = True

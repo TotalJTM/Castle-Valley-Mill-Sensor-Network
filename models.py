@@ -49,8 +49,14 @@ class Device(db.Model):
 
 	def remove(passed_device_id):
 		element = Device.query.filter_by(assigned_id=passed_device_id).first()
-		for i in element.sensors:
-			db.session.delete(i)
+		for j in element.battery_data:
+				db.session.delete(j)
+		for sens in element.sensors:
+			for j in sens.sensor_data:
+				db.session.delete(j)
+			for j in sens.events:
+				db.session.delete(j)
+			db.session.delete(sens)
 		db.session.delete(element)
 		db.session.commit()
 

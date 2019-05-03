@@ -60,7 +60,7 @@ def form_new(config_option,dev_num):
         form = DeviceForm(request.form)
         if(request.method == 'POST' and form.validate_on_submit()):
             new_device = Device.create(assigned_id=form.entry_assigned_id.data,title=form.entry_title.data,mill_floor=form.entry_mill_floor.data,battery_type=form.entry_battery_type.data)
-            socketio.emit('reload', True)
+            socketio.emit('reload', True, namespace="/config")
             return '<script>window.close()</script>'
         return render_template('deviceform.html', form=form)
 
@@ -68,7 +68,7 @@ def form_new(config_option,dev_num):
         form = SensorForm(request.form)
         if(request.method == 'POST' and form.validate_on_submit()):
             Device.new_sensor(dev_num,sensor_id=form.entry_assigned_id.data,sensor_title=form.entry_title.data,sensor_type=form.entry_sensor_type.data)
-            socketio.emit('reload', True)
+            socketio.emit('reload', True, namespace="/config")
             return '<script>window.close()</script>'
         return render_template('sensorform.html', form=form)
 
@@ -94,7 +94,7 @@ def form_edit(config_option,dev_num):
             element.mill_floor = form.entry_mill_floor.data
             element.battery_type = form.entry_battery_type.data
             db.session.commit()
-            socketio.emit('reload', True)
+            socketio.emit('reload', True, namespace="/config")
             return '<script>window.close()</script>'
         form.entry_assigned_id.data = element.assigned_id
         form.entry_title.data = element.title
@@ -119,7 +119,7 @@ def form_edit(config_option,dev_num):
                     db.session.commit()
                     log.logger.debug(i.title)
                     log.logger.debug("done")
-                    socketio.emit('reload', True)
+                    socketio.emit('reload', True, namespace="/config")
                     return '<script>window.close()</script>'
                 else:
                     form.entry_assigned_id.data = i.assigned_id
@@ -147,7 +147,7 @@ def form_edit(config_option,dev_num):
                             j.threshold_comparator = form.entry_threshold_comparator.data
                             j.on_event = form.entry_on_event.data
                             db.session.commit()
-                            socketio.emit('reload', True)
+                            socketio.emit('reload', True, namespace="/config")
                             return '<script>window.close()</script>'
                         form.entry_title.data = j.title
                         form.entry_threshold_val.data = j.threshold_val
@@ -158,23 +158,24 @@ def form_edit(config_option,dev_num):
         return "no sensor"
     return "not valid address"
 
-@socketio.on('handle_config')
+@socketio.on('handle_config', namespace="/config")
 def handle_config(json_data):
     id_name = json_data['id']
-    id_name = id_name.split('-')
+    pid_name = id_name.split('-')
     action = json_data['action']
     log.logger.debug(id_name)
     if action == "remove":
-        if id_name[1]:
-            Device.remove_sensor(id_name[0],id_name[1])
-            socketio.emit('reload', True)
+        if len(pid_name) > 1:
+            Device.remove_sensor(pid_name[0],pid_name[1])
+            log.logger.debug("sensor remove")
+            socketio.emit('reload', True, namespace="/config")
         else:
-            Device.remove(id_name[0])
-            socketio.emit('reload', True)
+            Device.remove(id_name)
+            socketio.emit('reload', True, namespace="/config")
     if str(action) == "removeevent":
         log.logger.debug(action)
-        Device.remove_sensor_event(id_name[0],id_name[1],id_name[2])
-        socketio.emit('reload', True)
+        Device.remove_sensor_event(pid_name[0],pid_name[1],pid_name[2])
+        socketio.emit('reload', True, namespace="/config")
 
 #@app.route("/config/remove/<config_option>", methods=['GET'])
 #def form_remove(config_option):
@@ -196,7 +197,7 @@ def form_event(config_option,address):
             Device.new_sensor_event(passed_id=str(parse_address[0]),sensor_id=str(parse_address[1]),threshold_val=form.entry_threshold_val.data,threshold_comparator=form.entry_threshold_comparator.data,on_event=form.entry_on_event.data,title=form.entry_title.data)
             d = Device.get_sensor_data(passed_id=str(parse_address[0]),sensor_id=str(parse_address[1]),nDatapoints=1)
             log.logger.debug(f'data {d} {parse_address[0]} {parse_address[1]}')
-            socketio.emit('reload', True)
+            socketio.emit('reload', True, namespace="/config")
             return '<script>window.close()</script>'
         return render_template('eventform.html', form=form)
     return "not valid address"
@@ -277,7 +278,7 @@ def update_site_data(dev_num):
         message['newdata'].append({"id":f'data|{dev_num}|{sensor.assigned_id}', "type":"data", "data":f'{sensor.sensor_data[-1].data}'})
             #if counter != len(sensor):
             #    message += ','
-    socketio.emit('updatepage', message)
+    socketio.emit('updatepage', message, namespace="/data")
 
 def update_header(alerts):
     alert_list = ""
@@ -288,7 +289,7 @@ def update_header(alerts):
         if counter != len(alert):
             alert_list += ','
     time = datetime.now().strftime("%b %d, %I:%M:%S")
-    socketio.emit('updateheader', {'time':f'{time}', 'alerts':[f'{alert_list}']}, broadcast=True, namespace="/floor")
+    socketio.emit('updateheader', {'time':f'{time}', 'alerts':[f'{alert_list}']}, broadcast=True, namespace="/all")
 
 @app.route("/server/retrieve", methods=['POST'])
 def serve_device():

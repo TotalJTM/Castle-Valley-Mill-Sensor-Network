@@ -5,34 +5,35 @@
 		<meta name="viewport" content="width=device-width">
 		<title> CVM Network</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-		<!-- Bootstrap CSS -->
-    	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
-    	<!-- Socketio JS-->
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
-        <!-- Jquery JS -->
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <!-- Bootstrap JS -->
-        <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>-->
-        <!--<script src="{{ url_for('static', filename='socketio.dev.js') }}"></script>-->
-        <!--<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>-->
-        <!--<script src="{{ url_for('static', filename='jquery.min.js') }}"></script>-->
-
-		<!--{{ url_for('static', filename='main.css') }}   updateheader -->
-		<script type="text/javascript" charset="utf-8" onload=>
+        <script src="{{ url_for('static', filename='js/socket.io.dev.js') }}"></script>
+        <!--<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>-->
+        <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+		<script type="text/javascript" charset="utf-8">
 
 			$(document).ready(function(){
-				alert("h")
-	    		var socket = io.connect('http://' + document.domain + ':' + location.port + "/floor");
-	      		socket.on('reload', function(data){
-	        		window.location.reload(true)
-	        	});
+				//alert("h")
+				var socket = io.connect('http://' + document.domain + ':' + location.port + '/all');
+	    		socket.on('connect', function() {
+            		socket.emit('connect', {data: 'I\'m connected!'});
+        		});
 	        	socket.on("updateheader", function(data){
-	        		alert(data);
+	        		//alert(data);
 	        		var timetext = document.getElementById("masthead_time");
 	        		timetext.innerHTML = data['time'];
 	        	});
+
+	    		var socket = io.connect('http://' + document.domain + ':' + location.port + '/data');
+	    		//socket.on('connect', function() {
+            	//	socket.emit('connect', {data: 'I\'m connected!'});
+        		//});
 	        	socket.on('updatepage', function(data){
-	        		
+	        		for (var i = 0; i < data.length; i++) {
+	        			if(document.getElementById(data[i]['id'])){
+	        				var ele = document.getElementById(data['id'])
+	        				ele.innerHTML = data[i]['data']
+	        			}
+	        		}
+
 	      		});
 	        });
 	        //setTimeout(function() {
@@ -45,7 +46,7 @@
 			<div class="header-element">
 					<span style="float:left;"><p  id="masthead_time" style="color:white">{{data.header.masthead_time}}</p></span>
 					{% if data.user.user_current %}
-			 			<span id="masthead_usertitle" style="float:right;">Hello {{data.user.user_current}} <a class="nav-link" href="{{url_for('logout')}}"> Logout</a></span>
+			 			<span id="masthead_usertitle" style="float:right;"><p>Hello {{data.user.user_current}} <a class="nav-link" href="{{url_for('logout')}}"> Logout</a></p></span>
 			 		{%endif%}
 			 </div>
 			 <div class="masthead-floors"> 
