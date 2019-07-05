@@ -390,8 +390,9 @@ def compile_into_BandG(floor_num, blocks_and_groups_input):
             for j in floor_data["devices"]:
                 for sens in j["sensors"]:
                     if sens["sensor_type"] == i["sensor_type"]:
-                        latest_data = sens["sensor_data"][0]
-                        group_element += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{latest_data["data"]}","status":""}},'
+                        if(len(sens["sensor_data"]) > 0):
+                            latest_data = sens["sensor_data"][0]
+                            group_element += f'{{"title":"{j["title"]}","id":"{j["assigned_id"]}","data":"{latest_data["data"]}","status":""}},'
         if group_element != "":
             group_element = group_element[:-1]
         log.logger.debug(group_element)

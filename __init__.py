@@ -16,9 +16,11 @@ socketio = SocketIO(app)			#initialize our socketio instance
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database\\app.db')
 tuser = 'sqlite:///' + os.path.join(basedir, 'database\\userdb.db')
 tnet = 'sqlite:///' + os.path.join(basedir, 'database\\network.db')
+tcheck = 'sqlite:///' + os.path.join(basedir, 'database\\checklist.db')
 SQLALCHEMY_BINDS = {		#create seperate database binds, allows multiple databases called 'users' and 'network'
     'users': tuser,
-    'network': tnet
+    'network': tnet,
+    'checklist': tcheck
 }
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'		#random key for flask security
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI		#configure database uri
@@ -33,7 +35,7 @@ login_manager.login_message_category = 'info'
 
 global active_alerts		#make global list for storing alert messages
 active_alerts = []
-
+from network import checklist
 from network import routes
 
 def update_client():							#create a thread to update the header of interface
