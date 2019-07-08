@@ -3,6 +3,7 @@ from flask_socketio import SocketIO
 from network import app, db, bcrypt, socketio
 from network.forms import LoginForm, DeviceForm, SensorForm, DeviceForm, SensorEventForm
 from network.models import User, Device, Sensor, SensorEvent
+from network.checklist import checklist
 from flask_login import login_user, current_user, logout_user, login_required
 import network.logs as log
 from network.pagecompiler import get_header_json, get_full_json, get_floor_json
@@ -322,6 +323,169 @@ def serve_floor_basement():
     data = compile_into_BandG(0,blocks_and_groups)
     log.logger.debug(data)
     return render_template('floorblank.html', data=data)
+
+@login_required
+@app.route("/checklist/", methods=["GET"])
+def serve_checklist_menu():
+    data = '{'
+    data += get_header_json()
+    data += '}'
+    data = json.loads(data)
+
+    element = checklist.get_checklist_names()
+    nl = []
+    for i in element:
+        temp = i.lower()
+        temp = temp.replace(' ','-')
+        nl.append([i,temp])
+    return render_template('checklistmenu.html', data=data, checklistname=nl)
+
+@login_required
+@app.route("/checklist/<spec_checklist>", methods=["GET"])
+def serve_checklists(spec_checklist):
+    data = '{'
+    data += get_header_json()
+    data += '}'
+    data = json.loads(data)
+
+    element = checklist.get_checklist_names()
+    nl = []
+    for i in element:
+        temp = i.lower()
+        temp = temp.replace(' ','-')
+        nl.append([i,temp])
+    for i in element:
+        temp = i.lower()
+        temp = temp.replace(' ','-')
+        if temp == spec_checklist:
+            cldata = checklist.get_checklist_day(i)
+            return render_template('checklistblank.html', data=data, checklist=cldata, checklistname=nl)
+    return None
+
+@app.route("/checklist/<spec_checklist>/config", methods=["GET","POST"])
+def config_checklists(spec_checklist):
+    data = '{'
+    data += get_header_json()
+    data += '}'
+    data = json.loads(data)
+
+    nl = []
+
+    if session['perms'] == 'super' and request.method == 'POST':
+        passed = request.form.to_dict()
+        f_action = passed['data[action]']
+        f_id = passed['data[id]']
+        f_type = passed['data[type]']
+        clist_name = None
+
+        element = checklist.get_checklist_names()
+        nl = []
+        for i in element:
+            temp = i.lower()
+            temp = temp.replace(' ','-')
+            nl.append([i,temp])
+            if temp == spec_checklist:
+                clist_name = i
+        log.logger.debug(f'{f_id},{f_action},{f_type}')
+        if clist_name:
+            if f_type == 'item':
+                if f_action == 'remove':
+                    checklist.remove_item(clist_name,int(f_id))
+                    log.logger.debug(f'{f_id},{clist_name}')
+                    socketio.emit('reload_clist', True)
+                if f_action == 'modify':
+                    pass
+                    
+            if f_type == 'zone':
+                if f_action == 'remove':
+                    log.logger.debug(f'{clist_name}, {f_id}')
+                    checklist.remove_zone(clist_name,f_id)
+                    socketio.emit('reload_clist', True)
+                if f_action == 'modify':
+                    pass
+                    
+            if f_type == 'checklist':
+                if f_action == 'remove':
+                    checklist.remove_checklist(clist_name)
+                    socketio.emit('reload_clist', True)
+                    spec_checklisttemp = checklist.get_checklist_names()
+                    spec_checklist = spec_checklisttemp[0]
+                if f_action == 'modify':
+                    pass
+
+    element = checklist.get_checklist_names()
+    for i in element:
+        temp = i.lower()
+        temp = temp.replace(' ','-')
+        if temp == spec_checklist:
+            cldata = checklist.get_checklist_day(i)
+
+    nl = []
+    for i in element:
+            temp = i.lower()
+            temp = temp.replace(' ','-')
+            nl.append([i,temp])
+
+    return render_template('checklistblankconf.html', data=data, checklist=cldata, checklistname=nl)
+
+@app.route("/checklist/form/<form_type>/<f_id>", methods=["GET","POST"])
+def checklist_form(form_type,f_id):
+    if form_type == 'checklist':
+        form = checklist.ChecklistForm(request.form)
+        if request.method == 'POST' :
+            log.logger.debug(f'{form.title.data}')
+            checklist.new_checklist(form.title.data)
+            socketio.emit('reload_clist', True)
+            return '<script>window.close()</script>'
+        return render_template('checklistform.html', form=form, id=f_id, f_type=form_type)
+    if form_type == 'zone':
+        form = checklist.ZoneForm(request.form)
+        if request.method == 'POST' :
+            log.logger.debug(f'{form.title.data},{f_id}')
+            f_id = checklist.get_real_checklist_name(f_id)
+            log.logger.debug(f'{f_id}')
+            if form.placement.data is None or form.placement.data == '':
+                checklist.new_zone(f_id,form.title.data)
+            else:
+                checklist.new_zone(f_id,form.title.data,placement=form.placement.data)
+            socketio.emit('reload_clist', True)
+            return '<script>window.close()</script>'
+        form.placement.data = ''
+        return render_template('checklistform.html', form=form, id=f_id, f_type=form_type)
+    if form_type == 'item':
+        form = checklist.ItemForm(request.form)
+        if request.method == 'POST' :
+            f_id = f_id.split('_')
+            f_id[0] = checklist.get_real_checklist_name(f_id[0])
+            f_id[1] = checklist.get_real_zone_name(f_id[1])
+            log.logger.debug(f'{f_id[0]},{f_id[1]}')
+            if form.placement.data:
+                checklist.new_item(f_id[0],f_id[1],form.title.data,placement=form.placement.data)
+            else:
+                checklist.new_item(f_id[0],f_id[1],form.title.data)
+            socketio.emit('reload_clist', True)
+            return '<script>window.close()</script>'
+        return render_template('checklistform.html', form=form, id=f_id, f_type=form_type)
+
+#form.entry_assigned_id.data
+
+@socketio.on('handleChecklistUpdate')
+def handleChecklistUpdate(json_data):
+    #log.logger.debug(f'{json_data.id}, {json_data.ctype}')
+    idOfClicked = int(json_data['id'])
+    checklistType = json_data['ctype']
+    log.logger.debug('11111111111111111111')
+    log.logger.debug(session['username'])
+    currentUser = str(session['username'])
+    log.logger.debug(currentUser)
+    element = checklist.get_checklist_names()
+    for i in element:
+        temp = i.lower()
+        temp = temp.replace(' ','-')
+        if temp == checklistType:
+            checklist.interact_checklist_item(checklist=i,zone=None,id_of_item=idOfClicked,username=currentUser,interaction='flip')
+            j = checklist.get_checklist_item(checklist=i,zone=None,id_of_item=idOfClicked)
+            socketio.emit('clist_update', {'id':idOfClicked, 'state':j['item_state']})
 
 @login_required
 @app.route("/config", methods=["GET"])

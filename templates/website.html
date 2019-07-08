@@ -5,9 +5,10 @@
 		<meta name="viewport" content="width=device-width">
 		<title> CVM Network</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+		<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
         <script src="{{ url_for('static', filename='js/socket.io.dev.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 		<script type="text/javascript" charset="utf-8">
 
 			$(document).ready(function(){
@@ -49,27 +50,15 @@
 			 			<span id="masthead_usertitle" style="float:right;"><p>Hello {{data.user.user_current}} <a class="nav-link" href="{{url_for('logout')}}"> Logout</a></p></span>
 			 		{%endif%}
 			 </div>
-			 <div class="masthead-floors"> 
+			 <div class="text-center"> 
 				<ul>
-				<div> 
 					<li><a class="floor-links" href="{{url_for('serve_floor_first')}}">Floor 1</a> </li>
-				</div>
-
-				<div>
 					<li><a class="floor-links" href="{{url_for('serve_floor_second')}}">Floor 2</a> </li>
-				</div>
-
-				<div>
 					<li><a class="floor-links" href="{{url_for('serve_floor_third')}}">Floor 3</a></li>
-				</div>
-
-				<div>
 					<li><a class="floor-links" href="{{url_for('serve_floor_basement')}}">Basement</a></li>
-				</div>
+					<li><a class="floor-links" href="{{url_for('serve_checklist_menu')}}">Checklist</a></li>
 				{% if data.user.user_permission == 'super' %}
-				<div>
 					<li><a class="floor-links" href="{{url_for('serve_config')}}">Configuration</a></li>
-				</div>
 				{% endif %}
 				</ul>
 			</div>

@@ -11,7 +11,6 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))				#get directory location
 
 app = Flask(__name__)				#initialize our flask instance
-socketio = SocketIO(app)			#initialize our socketio instance
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database\\app.db')
 tuser = 'sqlite:///' + os.path.join(basedir, 'database\\userdb.db')
@@ -25,6 +24,9 @@ SQLALCHEMY_BINDS = {		#create seperate database binds, allows multiple databases
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'		#random key for flask security
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI		#configure database uri
 app.config['SQLALCHEMY_BINDS'] = SQLALCHEMY_BINDS					#configure database binds
+
+socketio = SocketIO(app)			#initialize our socketio instance
+
 db = SQLAlchemy(app)									#initialize sqlalchemy
 db.create_all()											#create database and build tables
 

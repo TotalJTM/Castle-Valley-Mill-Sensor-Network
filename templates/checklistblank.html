@@ -1,0 +1,41 @@
+{% extends "website.html" -%}
+{% block content -%}
+ <script type="text/javascript" charset="utf-8">
+      var checklistsocket = io.connect('http://' + document.domain + ':' + location.port);
+      checklistsocket.on('clist_update', function(data){
+          if(data['state'] == false){
+              document.getElementById(data['id']).className = "list-group-item list-group-item-danger";
+          }else{
+              document.getElementById(data['id']).className = "list-group-item list-group-item-success";
+          }
+      });
+      
+      function updateChecklist(id_num){
+        var pathArray = window.location.pathname.split('/');
+        checklistsocket.emit('handleChecklistUpdate', {'id':String(id_num),'ctype':String(pathArray[2])});
+      }
+    </script>
+<div class="container">
+	<div class="btn-group">
+	{% for i in checklistname %}
+	<a role="button" class="btn btn-outline-secondary" href="{{i[1]}}">{{i[0]}}</a>
+	{% endfor %}
+	</div>
+	<br>
+	<h2>{{checklist['checklist_name']}} Checklist</h2>
+	</br>
+	{% for i in checklist['zones'] %}
+	<div class="zone">
+	<h3>{{i['zone_name']}}</h3>
+		{% for j in i['zone_items'] %}
+			{% if j['item_state'][0]['state'] == False %}
+				<a href="#" id="{{j['item_id']}}" onclick="updateChecklist(this.id);return false;" class="list-group-item list-group-item-danger">{{j['item_name']}}</a>
+			{% else %}
+				<a href="#" id="{{j['item_id']}}" onclick="updateChecklist(this.id);return false;" class="list-group-item list-group-item-success">{{j['item_name']}}</a>
+            {% endif %}
+         {% endfor %}
+        </br>
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}

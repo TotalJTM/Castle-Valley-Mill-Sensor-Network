@@ -1,0 +1,14 @@
+{% extends "website.html" -%}
+{% block content -%}
+<div class="container">
+	<div class="btn-group">
+	{% for i in checklistname %}
+	<a role="button" class="btn btn-outline-secondary" href="{{i[1]}}">{{i[0]}}
+    {% if data.user.user_permission == 'super' %}
+      <a href="/checklist/{{i[1]}}/config" onclick="" class="badge badge-danger float-right">Configure</a>
+    {% endif %}
+  </a>
+	{% endfor %}
+	</div>
+</div>
+{% endblock content %}
