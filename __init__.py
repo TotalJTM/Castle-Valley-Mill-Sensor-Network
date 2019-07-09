@@ -11,7 +11,6 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))				#get directory location
 
 app = Flask(__name__)				#initialize our flask instance
-socketio = SocketIO(app)			#initialize our socketio instance
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database\\app.db')
 tuser = 'sqlite:///' + os.path.join(basedir, 'database\\userdb.db')
@@ -25,6 +24,9 @@ SQLALCHEMY_BINDS = {		#create seperate database binds, allows multiple databases
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'		#random key for flask security
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI		#configure database uri
 app.config['SQLALCHEMY_BINDS'] = SQLALCHEMY_BINDS					#configure database binds
+
+socketio = SocketIO(app)			#initialize our socketio instance
+
 db = SQLAlchemy(app)									#initialize sqlalchemy
 db.create_all()											#create database and build tables
 
@@ -35,13 +37,14 @@ login_manager.login_message_category = 'info'
 
 global active_alerts		#make global list for storing alert messages
 active_alerts = []
-from network import checklist
+from network.checklist import checklist
+checklist.timed_checklist_reset()
 from network import routes
 
 def update_client():							#create a thread to update the header of interface
 	while active_count() > 0:					#if active threads
 		routes.update_header(active_alerts)		#call update_header function to push new updates to interface
-		time.sleep(7)							#sleep thread for x seconds so we dont spam user
+		time.sleep(10)							#sleep thread for x seconds so we dont spam user
 
 content_delivery = Thread(target=update_client)	#make a new thread for update_client method
 content_delivery.daemon = True					#allow the thread to be terminated

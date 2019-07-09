@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title> CVM Network</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/socket.io.dev.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <style>
+      .vericaltext{
+           width:1px;
+           transform: rotate(90deg);
+           transform-origin: 100% 60%;
+        }
+    </style>
+  </head>
+  <body>
+<div class="btn-group">
+  <a role="button" class="btn btn-outline-secondary" href="{{url_for('home')}}">Homepage</a>
+  {% for i in checklistname %}
+  <a role="button" class="btn btn-outline-secondary" href="/checklist/{{i[1]}}/compiled">{{i[0]}}</a>
+  {% endfor %}
+  </div>
+<div class="container">
+  <h2>{{checklist['checklist_name']}} Checklist</h2>
+  <table class="table table-bordered">
+  <thead>
+    <tr>
+      <th scope="col">Checklist Task</th>
+      {% for i in range(1,32) %}
+        <th scope="col">{{i}}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+  {% for zone in checklist['zones'] %}
+    <tr>
+      <th class="text-center" scope="row table-light" colspan="32">{{zone.zone_name}}</th>
+    </tr>
+    {% for item in zone['zone_items'] %}
+      <tr>
+        <th scope="row">{{item.item_name}}</th>
+      {% for day in item['item_state'] %}
+      {% if day['interactions'][0].state == True %}
+        <td class="table-success"><p class='vericaltext'>{{day.interactions[0].employee_initials}}</p></td>
+      {% else %}
+        <td class="table-danger"><p class='vericaltext'>n_d</p></td>
+      {% endif %}
+      {% endfor %}
+      </tr>
+    {% endfor %}
+  {% endfor %}
+  </tbody>
+  </table>
+</div>
+</body>
+</html>

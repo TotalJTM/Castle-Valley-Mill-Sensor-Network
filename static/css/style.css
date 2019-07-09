@@ -42,10 +42,10 @@ a.floor-links
 li
 {
 	float: left;
-	margin: 50px;
+	margin-top: 30px;
 	padding:4px;
-	padding-left: 3%;
-	padding-right: 3%;
+	padding-left: 2%;
+	padding-right: 2%;
 	border: black 1px solid;
 	list-style-type: none;
 }

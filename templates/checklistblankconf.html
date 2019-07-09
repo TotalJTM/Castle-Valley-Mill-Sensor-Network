@@ -1,0 +1,46 @@
+{% extends "website.html" -%}
+{% block content -%}
+ <script type="text/javascript" charset="utf-8">
+      var checklistsocket = io.connect('http://' + document.domain + ':' + location.port);
+      checklistsocket.on('reload_clist', function(data){
+        window.location.reload(true)
+      });
+      function confChecklist(eaction, etype, eid){
+        //$.post("",{'action':eaction, 'type':etype, 'id':eid});
+        var pathArray = window.location.pathname.split('/');
+        var path = pathArray[2]
+        $.ajax({
+          type : 'POST',
+          url : '',
+          dataType: 'json',
+          data : {'data':{action:eaction, type:etype, id:eid}}
+        });
+      }
+    </script>
+<div class="btn-group">
+  {% for i in checklistname %}
+  <a role="button" class="btn btn-outline-secondary" href="{{url_for('config_checklists',spec_checklist=i[1])}}">{{i[0]}}</a>
+  {% endfor %}
+  <a role="button" class="btn btn-outline-secondary" href="{{url_for('config_checklists',spec_checklist=i[1])}}">{{i[0]}}</a>
+  </div>
+<div class="container">
+	 <h2>{{checklist['checklist_name']}} Checklist 
+    <a href="#" onclick="window.open('/checklist/form/zone/{{checklist.checklist_url}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');" class="badge badge-success float-right">Add Zone</a>
+    <a href="#" onclick="confChecklist('remove','checklist','arb');" class="badge badge-danger float-right">Delete Checklist</a>
+    <a href="#" onclick="window.open('/checklist/form/checklist/{{checklist.checklist_url}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');" class="badge badge-success float-right">Add Checklist</a>
+    </h2>
+	   {% for i in checklist['zones'] %}
+	   <div class="zone">
+	     <h3>{{i['zone_name']}}
+        <a href="#" onclick="window.open('/checklist/form/item/{{checklist.checklist_url}}_{{i.zone_url}}','popUpWindow','height=500,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');" class="badge badge-success float-right">Add Item</a>
+        <a href="#" onclick="confChecklist('remove','zone','{{i.zone_name}}');" class="badge badge-danger float-right">Delete Zone</a>
+        </h3>
+       <ul class="list-group">
+		    {% for j in i['zone_items'] %}
+				  <li class="list-group-item">{{j['item_name']}}<a href="#" onclick="confChecklist('remove','item',{{j.item_id}});" class="badge badge-danger float-right">Delete Item</a></li>
+         {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}
