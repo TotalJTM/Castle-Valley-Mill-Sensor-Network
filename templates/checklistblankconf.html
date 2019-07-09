@@ -21,7 +21,6 @@
   {% for i in checklistname %}
   <a role="button" class="btn btn-outline-secondary" href="{{url_for('config_checklists',spec_checklist=i[1])}}">{{i[0]}}</a>
   {% endfor %}
-  <a role="button" class="btn btn-outline-secondary" href="{{url_for('config_checklists',spec_checklist=i[1])}}">{{i[0]}}</a>
   </div>
 <div class="container">
 	 <h2>{{checklist['checklist_name']}} Checklist 

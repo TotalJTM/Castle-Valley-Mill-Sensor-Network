@@ -499,6 +499,7 @@ def handleChecklistUpdate(json_data):
     idOfClicked = int(json_data['id'])
     checklistType = json_data['ctype']
     currentUser = str(session['username'])
+    log.logger.debug(currentUser)
     element = checklist.get_checklist_names()
     for i in element:
         temp = i.lower()
